@@ -199,7 +199,7 @@
     <div class="key-row">
       <label for="keySelect">調性</label>
       <select id="keySelect"></select>
-      <span class="help">短調は和声的短音階（導音を自動的に半音上げる）を基準に度数計算します。</span>
+      <span class="help">短調は自然短音階を基準に度数計算します。</span>
     </div>
   </div>
 
@@ -227,7 +227,7 @@
     <p class="help">
       <b>低音進行の配置ルール：</b>2番目以降の低音は、直前の低音との音程を増5度（8半音）以内にしてください（1番目の低音は加線にはみ出しても構いません）。
       違反すると「五線譜を生成」時にエラーが表示されます。<br>
-      <b>短調でVの和音（属和音）を入力する行</b>では、数字欄の下に導音の扱い（♯3にする／自然短音階のまま♭3にする）を選ぶプルダウンが自動で表示されます。
+      <b>短調でVの和音（属和音）を入力する行</b>では、数字欄の下に導音の扱い（自然短音階のままにする／♯3にして導音化する）を選ぶオプションが表示されます。
     </p>
   </div>
 
@@ -252,12 +252,33 @@
 /* =========================================================
    1. music theory core
    ========================================================= */
-const LETTERS = ['C','D','E','F','G','A','B'];
+const LETTERS = ['C','D','E','F','G','A','B']; // 内部計算用
 const NOTE_BASE = {C:0,D:2,E:4,F:5,G:7,A:9,B:11};
 const SHARP_ORDER = ['F','C','G','D','A','E','B'];
 const FLAT_ORDER  = ['B','E','A','D','G','C','F'];
-const ACC_SYMBOL = {'-2':'bb','-1':'b','0':'','1':'#','2':'##'};
 const ACC_VALUE  = {'bb':-2,'b':-1,'':0,'#':1,'##':2};
+
+// ドイツ語音名の取得（表示用）
+function getGermanNoteName(letter, acc) {
+  if (letter === 'B') { // 英語のB
+    if (acc === 0) return 'H';
+    if (acc === 1) return 'His';
+    if (acc === 2) return 'Hisis';
+    if (acc === -1) return 'B'; // 英語のBb = ドイツ語のB
+    if (acc === -2) return 'Heses';
+  }
+  if (letter === 'E' && acc === -1) return 'Es';
+  if (letter === 'E' && acc === -2) return 'Eses';
+  if (letter === 'A' && acc === -1) return 'As';
+  if (letter === 'A' && acc === -2) return 'Ases';
+
+  let base = letter;
+  if (acc === 1) return base + 'is';
+  if (acc === 2) return base + 'isis';
+  if (acc === -1) return base + 'es';
+  if (acc === -2) return base + 'eses';
+  return base;
+}
 
 // key signature table: sharps positive, flats negative
 const KEY_SIGNATURES = {
@@ -266,19 +287,22 @@ const KEY_SIGNATURES = {
   'A_minor':0,'E_minor':1,'B_minor':2,'F#_minor':3,'C#_minor':4,'G#_minor':5,'D#_minor':6,
   'D_minor':-1,'G_minor':-2,'C_minor':-3,'F_minor':-4,'Bb_minor':-5,'Eb_minor':-6
 };
+
+// ドイツ語表記の調名
 const KEY_LABELS = {
-  'C_major':'ハ長調 C Major','G_major':'ト長調 G Major','D_major':'ニ長調 D Major','A_major':'イ長調 A Major',
-  'E_major':'ホ長調 E Major','B_major':'ロ長調 B Major','F#_major':'嬰ヘ長調 F# Major','C#_major':'嬰ハ長調 C# Major',
-  'F_major':'ヘ長調 F Major','Bb_major':'変ロ長調 Bb Major','Eb_major':'変ホ長調 Eb Major','Ab_major':'変イ長調 Ab Major',
-  'Db_major':'変ニ長調 Db Major','Gb_major':'変ト長調 Gb Major','Cb_major':'変ハ長調 Cb Major',
-  'A_minor':'イ短調 A Minor','E_minor':'ホ短調 E Minor','B_minor':'ロ短調 B Minor','F#_minor':'嬰ヘ短調 F# Minor',
-  'C#_minor':'嬰ハ短調 C# Minor','G#_minor':'嬰ト短調 G# Minor','D#_minor':'嬰ニ短調 D# Minor',
-  'D_minor':'ニ短調 D Minor','G_minor':'ト短調 G Minor','C_minor':'ハ短調 C Minor','F_minor':'ヘ短調 F Minor',
-  'Bb_minor':'変ロ短調 Bb Minor','Eb_minor':'変ホ短調 Eb Minor'
+  'C_major':'ハ長調 C-Dur','G_major':'ト長調 G-Dur','D_major':'ニ長調 D-Dur','A_major':'イ長調 A-Dur',
+  'E_major':'ホ長調 E-Dur','B_major':'ロ長調 H-Dur','F#_major':'嬰ヘ長調 Fis-Dur','C#_major':'嬰ハ長調 Cis-Dur',
+  'F_major':'ヘ長調 F-Dur','Bb_major':'変ロ長調 B-Dur','Eb_major':'変ホ長調 Es-Dur','Ab_major':'変イ長調 As-Dur',
+  'Db_major':'変ニ長調 Des-Dur','Gb_major':'変ト長調 Ges-Dur','Cb_major':'変ハ長調 Ces-Dur',
+  'A_minor':'イ短調 a-Moll','E_minor':'ホ短調 e-Moll','B_minor':'ロ短調 h-Moll','F#_minor':'嬰ヘ短調 fis-Moll',
+  'C#_minor':'嬰ハ短調 cis-Moll','G#_minor':'嬰ト短調 gis-Moll','D#_minor':'嬰ニ短調 dis-Moll',
+  'D_minor':'ニ短調 d-Moll','G_minor':'ト短調 g-Moll','C_minor':'ハ短調 c-Moll','F_minor':'ヘ短調 f-Moll',
+  'Bb_minor':'変ロ短調 b-Moll','Eb_minor':'変ホ短調 es-Moll'
 };
 
 function buildDiatonicScale(keyName, raiseSeventh){
-  if(raiseSeventh === undefined) raiseSeventh = true;
+  // 短調でもデフォルトは自然短音階にするため、明示的に true が渡されない限り上げない
+  if(raiseSeventh === undefined) raiseSeventh = false; 
   const [tonicRaw, mode] = keyName.split('_');
   const tonicLetter = tonicRaw[0];
   const sig = KEY_SIGNATURES[keyName];
@@ -297,18 +321,11 @@ function buildDiatonicScale(keyName, raiseSeventh){
   return scale;
 }
 
-// 1-based scale degree of a given natural letter within the diatonic scale (letter-name only)
 function scaleDegreeOfLetter(letter, scale){
   const idx = scale.findIndex(s=>s.letter===letter);
   return idx + 1;
 }
 
-// diatonic "staff position" index (independent of accidental) - used for ledger-line checks
-function diatonicStepIndex(letter, octave){
-  return octave*7 + LETTERS.indexOf(letter);
-}
-
-// absolute semitone position (includes accidental) - used for interval-size checks
 function absSemitone(letter, acc, octave){
   return octave*12 + NOTE_BASE[letter] + acc;
 }
@@ -317,7 +334,6 @@ function pitchClassOf(letter, acc){
   return ((NOTE_BASE[letter] + acc) % 12 + 12) % 12;
 }
 
-// degree: 1-based scale-step distance above bass (letter-name counting)
 function degreeToPitch(bassLetter, degree, explicitAcc, scale){
   const bassIdx = scale.findIndex(s=>s.letter===bassLetter);
   const idx = ((bassIdx + (degree-1)) % 7 + 7) % 7;
@@ -343,26 +359,24 @@ function parseToken(tok){
   return null;
 }
 
-// combos keyed by sorted comma-joined degree list -> additional degrees to realize (besides bass=1)
 const COMBO_TABLE = {
   '':[3,5],
   '6':[3,6],
   '4,6':[4,6],
   '7':[3,5,7],
-  '5,6':[3,5,6],       // 6/5
-  '3,4':[3,4,6],       // 4/3 (seventh, 3rd inversion figure) -- see suspension override below
-  '2,4':[2,4,6],       // 4/2
+  '5,6':[3,5,6],
+  '3,4':[3,4,6],
+  '2,4':[2,4,6],
   '2':[2,4,6],
   '9':[3,5,7,9],
   '7,9':[3,5,7,9],
   '5,9':[3,5,7,9]
 };
-// when the raw string contained a dash ("-"), treat as a suspension figure instead
 const SUSPENSION_TABLE = {
-  '3,4':[3,4,5],   // 4-3
-  '6,7':[3,6,7],   // 7-6
-  '8,9':[3,5,9],   // 9-8
-  '2,3':[2,3,5]    // 3-2 (rare)
+  '3,4':[3,4,5],
+  '6,7':[3,6,7],
+  '8,9':[3,5,9],
+  '2,3':[2,3,5]
 };
 const AUGMENTED_SIXTHS = {
   'it6':[0,4,10], 'it+6':[0,4,10], 'italian6':[0,4,10],
@@ -390,7 +404,6 @@ function parseFigureString(str){
   } else if(COMBO_TABLE[sortedKey]){
     extraDegrees = COMBO_TABLE[sortedKey];
   } else {
-    // fallback: bass + explicit tokens + default 3,5 unless already implied by 4/6 replacements
     const given = new Set(tokens.map(t=>t.degree));
     extraDegrees = [...given];
     if(!given.has(4) && !given.has(6) && !given.has(2) && !given.has(9)){
@@ -398,7 +411,6 @@ function parseFigureString(str){
       if(!given.has(5)) extraDegrees.push(5);
     }
   }
-  // build entries: prefer explicit accidental from tokens when matching degree, else null(=diatonic default)
   const accByDegree = {};
   tokens.forEach(t=>{ if(t.acc!==null) accByDegree[t.degree]=t.acc; });
   const entries = [{degree:1, acc:null}];
@@ -414,7 +426,7 @@ function parseFigureString(str){
 function resolveChordTones(bassLetter, bassAcc, figureStr, scale){
   const parsed = parseFigureString(figureStr);
   const bassPc = pitchClassOf(bassLetter, bassAcc);
-  let tones = []; // {letter, acc, pc}
+  let tones = []; 
   if(parsed.type==='absolute'){
     tones.push({letter:bassLetter, acc:bassAcc, pc:bassPc});
     parsed.offsets.slice(1).forEach(off=>{
@@ -458,7 +470,7 @@ function addRow(preset){
     <td>${rowCounter}</td>
     <td>
       <select class="letterSel">
-        ${LETTERS.map(l=>`<option value="${l}" ${preset.letter===l?'selected':''}>${l}</option>`).join('')}
+        ${LETTERS.map(l=>`<option value="${l}" ${preset.letter===l?'selected':''}>${l==='B'?'H':l}</option>`).join('')}
       </select>
     </td>
     <td>
@@ -482,8 +494,8 @@ function addRow(preset){
     <td>
       <input type="text" class="fig-input figInput" placeholder="例: 6/4" value="${preset.fig||''}"><br>
       <select class="leadingToneSel" style="display:none; margin-top:.3rem; font-size:.75rem;">
-        <option value="raised">V: 導音(♯3)</option>
         <option value="natural">V: 自然(♭3・導音化しない)</option>
+        <option value="raised">V: 導音(♯3)</option>
       </select>
     </td>
     <td><button type="button" class="del-btn" title="削除">×</button></td>
@@ -495,13 +507,11 @@ function addRow(preset){
   updateLeadingToneOptions();
 }
 
-// show the extra "leading tone" dropdown only for rows whose bass sits on
-// scale-degree 5 (the dominant) in a MINOR key, where raising the 3rd (leading tone)
-// is a real choice (major keys have it diatonically raised already, no ambiguity).
 function updateLeadingToneOptions(){
   const keyName = keySelect.value;
   const mode = keyName.split('_')[1];
-  const scaleRef = buildDiatonicScale(keyName, true);
+  // 導音判定用のスケールは自然短音階のままで5度(V)を見つけるため false を指定
+  const scaleRef = buildDiatonicScale(keyName, false);
   Array.from(rowsBody.querySelectorAll('tr')).forEach(tr=>{
     const letter = tr.querySelector('.letterSel').value;
     const sel = tr.querySelector('.leadingToneSel');
@@ -510,14 +520,14 @@ function updateLeadingToneOptions(){
       sel.style.display = '';
     } else {
       sel.style.display = 'none';
-      sel.value = 'raised';
+      sel.value = 'natural'; // デフォルト状態
     }
   });
 }
 
 document.getElementById('addRowBtn').addEventListener('click', ()=>addRow());
 
-// initial demo rows: I-V6-I6-ii6/5-V7-I  (typical cadential progression in C major)
+// initial demo rows
 addRow({letter:'C', acc:0, oct:3, dur:'q', fig:''});
 addRow({letter:'B', acc:0, oct:2, dur:'q', fig:'6'});
 addRow({letter:'E', acc:0, oct:3, dur:'q', fig:'6'});
@@ -531,7 +541,8 @@ addRow({letter:'C', acc:0, oct:3, dur:'q', fig:''});
 const ACC_TO_VEX = {'-2':'bb','-1':'b','0':null,'1':'#','2':'##'};
 
 function vexKey(letter, acc, octave){
-  const sym = ACC_SYMBOL[String(acc)] || '';
+  // VexFlow requires English letter logic internally
+  const sym = ACC_TO_VEX[String(acc)] || '';
   return `${letter.toLowerCase()}${sym}/${octave}`;
 }
 
@@ -545,7 +556,6 @@ function figureDisplayLines(str){
   if(!raw) return [];
   const lower = raw.toLowerCase().replace(/\s+/g,'');
   if(FIGURE_SPECIAL_LABELS[lower]) return [FIGURE_SPECIAL_LABELS[lower]];
-  // stacked numbers are separated by "/" or whitespace; a dash ("4-3") stays on one line
   return raw.split(/[\/\s]+/).filter(Boolean);
 }
 
@@ -554,8 +564,6 @@ function keyNameToVexSig(keyName){
   return mode==='minor' ? tonicRaw+'m' : tonicRaw;
 }
 
-// ---- bass-line positioning rules ----
-// rule: every bass note must be within an augmented 5th (8 semitones) of the previous one
 function validateBassLine(bassEntries){
   if(bassEntries.length===0) return null;
   for(let i=1;i<bassEntries.length;i++){
@@ -564,7 +572,9 @@ function validateBassLine(bassEntries){
     const s2 = absSemitone(cur.letter, cur.acc, cur.oct);
     const diff = Math.abs(s2-s1);
     if(diff > 8){
-      return `${i+1}番目の低音（${cur.letter}${ACC_SYMBOL[String(cur.acc)]||''}${cur.oct}）が直前の低音（${prev.letter}${ACC_SYMBOL[String(prev.acc)]||''}${prev.oct}）との音程で増5度（8半音）を超えています（実際の差：${diff}半音）。低音同士の跳躍は増5度以内に収めてください。`;
+      const prevName = getGermanNoteName(prev.letter, prev.acc);
+      const curName = getGermanNoteName(cur.letter, cur.acc);
+      return `${i+1}番目の低音（${curName}${cur.oct}）が直前の低音（${prevName}${prev.oct}）との音程で増5度（8半音）を超えています（実際の差：${diff}半音）。低音同士の跳躍は増5度以内に収めてください。`;
     }
   }
   return null;
@@ -572,7 +582,7 @@ function validateBassLine(bassEntries){
 
 function generateScore(){
   if(typeof Vex === 'undefined' || !Vex.Flow){
-    throw new Error('VexFlowライブラリの読み込みに失敗しました。ネットワーク接続、または広告ブロッカー/スクリプトブロッカーの設定をご確認ください。');
+    throw new Error('VexFlowライブラリの読み込みに失敗しました。');
   }
   const holder = document.getElementById('score-holder');
   const tonesList = document.getElementById('tonesList');
@@ -581,8 +591,8 @@ function generateScore(){
   if(rows.length===0){ return; }
 
   const keyName = keySelect.value;
-  const scaleRaised  = buildDiatonicScale(keyName, true);   // harmonic minor (or major, unaffected)
-  const scaleNatural = buildDiatonicScale(keyName, false);  // natural minor (un-raised 7th)
+  const scaleNatural = buildDiatonicScale(keyName, false);  // natural minor (default)
+  const scaleRaised  = buildDiatonicScale(keyName, true);   // harmonic minor 
 
   const bassEntries = [];
   rows.forEach((tr, i)=>{
@@ -592,11 +602,10 @@ function generateScore(){
     const dur = tr.querySelector('.durSel').value;
     const fig = tr.querySelector('.figInput').value;
     const leadingToneSel = tr.querySelector('.leadingToneSel');
-    const leadingToneMode = (leadingToneSel.style.display !== 'none') ? leadingToneSel.value : 'raised';
+    const leadingToneMode = (leadingToneSel.style.display !== 'none') ? leadingToneSel.value : 'natural';
     bassEntries.push({letter, acc, oct, dur, fig, leadingToneMode, idx:i+1});
   });
 
-  // ---- positioning rules ----
   const validationError = validateBassLine(bassEntries);
   if(validationError){
     alert('入力エラー:\n\n' + validationError);
@@ -612,31 +621,25 @@ function generateScore(){
   const summary = [];
 
   bassEntries.forEach(entry=>{
-    // ---- bass note ----
     const bKey = vexKey(entry.letter, entry.acc, entry.oct);
     const bNote = new VF.StaveNote({keys:[bKey], duration:entry.dur, clef:'bass'});
     const bSym = ACC_TO_VEX[String(entry.acc)];
     if(bSym) bNote.addModifier(new VF.Accidental(bSym), 0);
     bassNotes.push(bNote);
 
-    // ---- resolve harmony (use the natural-minor scale only for rows flagged "V: natural") ----
-    const rowScale = entry.leadingToneMode==='natural' ? scaleNatural : scaleRaised;
+    const rowScale = entry.leadingToneMode==='raised' ? scaleRaised : scaleNatural;
     const tones = resolveChordTones(entry.letter, entry.acc, entry.fig, rowScale);
     const pcSet = [...new Set(tones.map(t=>t.pc))];
 
-    // find spellings: for tones with known letter/acc use them; for absolute-offset tones (aug6) derive a reasonable spelling
     const spellings = tones.map(t=>{
       if(t.letter){ return {letter:t.letter, acc:t.acc, pc:t.pc}; }
-      // derive nearest letter spelling for a raw pitch-class (used only for aug6 chord extra tones)
       for(const s of rowScale){
         if(pitchClassOf(s.letter, s.acc)===t.pc) return {letter:s.letter, acc:s.acc, pc:t.pc};
       }
-      // fallback: use chromatic letter guess
       const guessLetters = ['C','C','D','D','E','F','F','G','G','A','A','B'];
       return {letter:guessLetters[t.pc], acc:0, pc:t.pc};
     });
 
-    // build all dot keys across octave range 4-5 matching any pc in pcSet
     const dotKeys = [];
     [4,5].forEach(oct=>{
       spellings.forEach(sp=>{
@@ -651,12 +654,6 @@ function generateScore(){
     });
 
     const tNote = new VF.StaveNote({keys:dotKeys, duration:entry.dur, clef:'treble', auto_stem:true});
-
-    // Dense "dot" chords can pack many pitches (including octave duplicates of the
-    // same altered tone) very close together, and VexFlow's default accidental
-    // column does not always clear every notehead in that situation - not just
-    // when two notes are a plain 2nd apart. To guarantee no overlap, every
-    // accidental in these chords gets a generous uniform extra left shift.
     dotKeys.forEach((k, i)=>{
       const accPart = k.slice(1, k.indexOf('/'));
       const vAcc = accPart==='' ? null : accPart;
@@ -668,11 +665,16 @@ function generateScore(){
       tNote.setKeyStyle(i, {fillStyle: '#7a2e2e', strokeStyle:'#7a2e2e'});
     });
     tNote.setStemStyle && tNote.setStemStyle({strokeStyle:'rgba(0,0,0,0)'});
-    // hide stems for a pure "dot" look
     tNote.render_options.stroke_style = 'rgba(0,0,0,0)';
     trebleNotes.push(tNote);
 
-    summary.push({idx:entry.idx, bass:`${entry.letter}${ACC_SYMBOL[String(entry.acc)]||''}${entry.oct}`, fig: entry.fig||'(5/3)', spellings, pcSet});
+    summary.push({
+      idx: entry.idx, 
+      bass: `${getGermanNoteName(entry.letter, entry.acc)}${entry.oct}`, 
+      fig: entry.fig||'(5/3)', 
+      spellings, 
+      pcSet
+    });
   });
 
   const bassVoice = new VF.Voice({num_beats: bassEntries.length, beat_value:4}).setStrict(false);
@@ -680,19 +682,12 @@ function generateScore(){
   const trebleVoice = new VF.Voice({num_beats: bassEntries.length, beat_value:4}).setStrict(false);
   trebleVoice.addTickables(trebleNotes);
 
-  // ---- pre-calculate the minimum width actually needed (accidentals, displaced note
-  // heads for seconds, etc. are all accounted for by VexFlow here) so that Formatter
-  // never has to compress notes horizontally - this is what caused accidentals to
-  // collide with the previous note when notes were squeezed into a fixed width.
   const formatter = new VF.Formatter();
   formatter.joinVoices([trebleVoice]);
   formatter.joinVoices([bassVoice]);
   const minJustifyWidth = formatter.preCalculateMinTotalWidth([trebleVoice, bassVoice]);
-  // roughly double the previous spacing: give each note a generous extra gap
-  // rather than just a small fixed buffer, on top of the true minimum required width.
   const justifyWidth = minJustifyWidth + bassEntries.length*115 + 40;
-
-  const staveStartPad = 90; // room for clef + key signature before notes begin
+  const staveStartPad = 90; 
   const staveWidth = justifyWidth + staveStartPad + 30;
   const width = staveWidth + 40;
   const height = 360;
@@ -724,11 +719,6 @@ function generateScore(){
   trebleVoice.draw(ctx, trebleStave);
   bassVoice.draw(ctx, bassStave);
 
-  // ---- draw the figured-bass numerals under the bass staff ----
-  // Baseline is computed dynamically from the actual rendered bounding box of every
-  // bass note (notehead + stem + ledger lines), so low or high bass registers never
-  // collide with the figures - a single shared baseline is used for the whole system,
-  // matching traditional figured-bass engraving.
   let maxBottom = bassStave.getYForLine(4);
   bassNotes.forEach(note=>{
     const bb = note.getBoundingBox && note.getBoundingBox();
@@ -753,11 +743,10 @@ function generateScore(){
     ctx.restore();
   });
 
-  // ---- textual resolution list ----
   summary.forEach(s=>{
     const div = document.createElement('div');
     div.className = 'row';
-    const spellStr = s.spellings.map(sp=>`${sp.letter}${ACC_SYMBOL[String(sp.acc)]||''}`).join(' , ');
+    const spellStr = s.spellings.map(sp => getGermanNoteName(sp.letter, sp.acc)).join(' , ');
     div.innerHTML = `<span class="idx">${s.idx}</span><span class="fig">${s.bass} [${s.fig}]</span><span class="tones">→ ${spellStr}</span>`;
     tonesList.appendChild(div);
   });
@@ -768,7 +757,6 @@ document.getElementById('generateBtn').addEventListener('click', ()=>{
   catch(e){ console.error(e); alert('生成エラー: ' + e.message); }
 });
 
-// initial render
 window.addEventListener('load', ()=>{
   try{ generateScore(); } catch(e){ console.error(e); }
 });

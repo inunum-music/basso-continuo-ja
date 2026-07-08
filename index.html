@@ -1,765 +1,765 @@
 <!DOCTYPE html>
 <html lang="ja">
-<head>
-<meta charset="UTF-8">
-  
-<meta property="og:url" content="https://inunum-music.github.io/basso-continuo-ja/">
-<meta property="og:type" content="product">
-<meta property="og:title" content="数字付き低音 自動生成">
-<meta property="og:description" content="現役音大生２人がつくる本格的バロック和声分析・アレンジメントツール。">
-<meta property="og:site_name" content="通奏低音レアリゼーション ツール">
-<meta property="og:image" content="https://github.com/inunum-music/previmages/preview.png">
-  
-<title>通奏低音レアリゼーション・ヴィジュアライザー</title>
-<script src="https://cdn.jsdelivr.net/npm/vexflow@4.2.2/build/cjs/vexflow.js"></script>
-<style>
-  :root{
-    --paper:#efe8d8;
-    --paper-dark:#e2d8c1;
-    --ink:#2b241c;
-    --ink-soft:#5c5344;
-    --line:#c9bc9c;
-    --accent:#7a2e2e;
-    --accent-soft:#a85c3f;
-    --brass:#8a7539;
-    font-size:16px;
-  }
-  *{box-sizing:border-box;}
-  body{
-    margin:0;
-    background:
-      radial-gradient(ellipse at top left, #f5efe0 0%, transparent 60%),
-      var(--paper);
-    color:var(--ink);
-    font-family:"Iowan Old Style","Palatino Linotype","Hoefler Text",Georgia,serif;
-    padding:2.5rem 1.5rem 4rem;
-  }
-  .wrap{max-width:980px;margin:0 auto;}
-  header{
-    border-bottom:2px solid var(--ink);
-    padding-bottom:1.1rem;
-    margin-bottom:1.8rem;
-    display:flex;
-    justify-content:space-between;
-    align-items:flex-end;
-    flex-wrap:wrap;
-    gap:.5rem;
-  }
-  h1{
-    font-size:1.55rem;
-    font-weight:600;
-    letter-spacing:.02em;
-    margin:0;
-  }
-  h1 small{
-    display:block;
-    font-family:"Helvetica Neue",Arial,sans-serif;
-    font-size:.68rem;
-    letter-spacing:.18em;
-    text-transform:uppercase;
-    color:var(--accent-soft);
-    margin-top:.3rem;
-  }
-  .figbass-mark{
-    font-family:"Helvetica Neue",Arial,sans-serif;
-    font-size:.7rem;
-    letter-spacing:.1em;
-    color:var(--ink-soft);
-    border:1px solid var(--line);
-    padding:.25rem .6rem;
-    border-radius:2px;
-    background:rgba(255,255,255,.35);
-  }
+  <head>
+    <meta charset="UTF-8">
+      
+    <meta property="og:url" content="https://inunum-music.github.io/basso-continuo-ja/">
+    <meta property="og:type" content="product">
+    <meta property="og:title" content="数字付き低音 自動生成">
+    <meta property="og:description" content="現役音大生２人がつくる本格的バロック和声分析・アレンジメントツール。">
+    <meta property="og:site_name" content="通奏低音レアリゼーション ツール">
+    <meta property="og:image" content="https://github.com/inunum-music/previmages/preview.png">
+      
+    <title>通奏低音レアリゼーション・ヴィジュアライザー</title>
+    <script src="https://cdn.jsdelivr.net/npm/vexflow@4.2.2/build/cjs/vexflow.js"></script>
+    <style>
+      :root{
+        --paper:#efe8d8;
+        --paper-dark:#e2d8c1;
+        --ink:#2b241c;
+        --ink-soft:#5c5344;
+        --line:#c9bc9c;
+        --accent:#7a2e2e;
+        --accent-soft:#a85c3f;
+        --brass:#8a7539;
+        font-size:16px;
+      }
+      *{box-sizing:border-box;}
+      body{
+        margin:0;
+        background:
+          radial-gradient(ellipse at top left, #f5efe0 0%, transparent 60%),
+          var(--paper);
+        color:var(--ink);
+        font-family:"Iowan Old Style","Palatino Linotype","Hoefler Text",Georgia,serif;
+        padding:2.5rem 1.5rem 4rem;
+      }
+      .wrap{max-width:980px;margin:0 auto;}
+      header{
+        border-bottom:2px solid var(--ink);
+        padding-bottom:1.1rem;
+        margin-bottom:1.8rem;
+        display:flex;
+        justify-content:space-between;
+        align-items:flex-end;
+        flex-wrap:wrap;
+        gap:.5rem;
+      }
+      h1{
+        font-size:1.55rem;
+        font-weight:600;
+        letter-spacing:.02em;
+        margin:0;
+      }
+      h1 small{
+        display:block;
+        font-family:"Helvetica Neue",Arial,sans-serif;
+        font-size:.68rem;
+        letter-spacing:.18em;
+        text-transform:uppercase;
+        color:var(--accent-soft);
+        margin-top:.3rem;
+      }
+      .figbass-mark{
+        font-family:"Helvetica Neue",Arial,sans-serif;
+        font-size:.7rem;
+        letter-spacing:.1em;
+        color:var(--ink-soft);
+        border:1px solid var(--line);
+        padding:.25rem .6rem;
+        border-radius:2px;
+        background:rgba(255,255,255,.35);
+      }
 
-  .panel{
-    background:rgba(255,255,255,.4);
-    border:1px solid var(--line);
-    border-radius:4px;
-    padding:1.2rem 1.3rem;
-    margin-bottom:1.3rem;
-  }
-  .panel-title{
-    font-family:"Helvetica Neue",Arial,sans-serif;
-    font-size:.72rem;
-    letter-spacing:.14em;
-    text-transform:uppercase;
-    color:var(--accent);
-    margin:0 0 .8rem 0;
-    display:flex;
-    align-items:center;
-    gap:.5rem;
-  }
-  .panel-title::after{
-    content:"";
-    flex:1;
-    height:1px;
-    background:var(--line);
-  }
+      .panel{
+        background:rgba(255,255,255,.4);
+        border:1px solid var(--line);
+        border-radius:4px;
+        padding:1.2rem 1.3rem;
+        margin-bottom:1.3rem;
+      }
+      .panel-title{
+        font-family:"Helvetica Neue",Arial,sans-serif;
+        font-size:.72rem;
+        letter-spacing:.14em;
+        text-transform:uppercase;
+        color:var(--accent);
+        margin:0 0 .8rem 0;
+        display:flex;
+        align-items:center;
+        gap:.5rem;
+      }
+      .panel-title::after{
+        content:"";
+        flex:1;
+        height:1px;
+        background:var(--line);
+      }
 
-  .key-row{display:flex;align-items:center;gap:.7rem;flex-wrap:wrap;}
-  label{font-size:.82rem;color:var(--ink-soft);}
-  select, input[type=text], input[type=number]{
-    font-family:inherit;
-    font-size:.9rem;
-    background:#fdfbf5;
-    border:1px solid var(--line);
-    border-radius:3px;
-    padding:.35rem .5rem;
-    color:var(--ink);
-  }
-  select:focus, input:focus{outline:2px solid var(--accent-soft); outline-offset:1px;}
+      .key-row{display:flex;align-items:center;gap:.7rem;flex-wrap:wrap;}
+      label{font-size:.82rem;color:var(--ink-soft);}
+      select, input[type=text], input[type=number]{
+        font-family:inherit;
+        font-size:.9rem;
+        background:#fdfbf5;
+        border:1px solid var(--line);
+        border-radius:3px;
+        padding:.35rem .5rem;
+        color:var(--ink);
+      }
+      select:focus, input:focus{outline:2px solid var(--accent-soft); outline-offset:1px;}
 
-  table.rows{width:100%; border-collapse:collapse;}
-  table.rows th{
-    font-family:"Helvetica Neue",Arial,sans-serif;
-    font-size:.66rem;
-    letter-spacing:.08em;
-    text-transform:uppercase;
-    color:var(--ink-soft);
-    text-align:left;
-    padding:.3rem .4rem;
-    border-bottom:1px solid var(--line);
-  }
-  table.rows td{padding:.35rem .4rem; vertical-align:middle;}
-  table.rows tr:not(:last-child) td{border-bottom:1px solid #ddd2b8;}
-  .fig-input{width:9.5rem;}
-  .oct-input{width:3.4rem;}
-  .del-btn{
-    background:none;border:1px solid var(--line);border-radius:3px;
-    color:var(--accent); cursor:pointer; font-size:.9rem; width:1.8rem; height:1.8rem;
-    line-height:1;
-  }
-  .del-btn:hover{background:var(--accent); color:#fff; border-color:var(--accent);}
+      table.rows{width:100%; border-collapse:collapse;}
+      table.rows th{
+        font-family:"Helvetica Neue",Arial,sans-serif;
+        font-size:.66rem;
+        letter-spacing:.08em;
+        text-transform:uppercase;
+        color:var(--ink-soft);
+        text-align:left;
+        padding:.3rem .4rem;
+        border-bottom:1px solid var(--line);
+      }
+      table.rows td{padding:.35rem .4rem; vertical-align:middle;}
+      table.rows tr:not(:last-child) td{border-bottom:1px solid #ddd2b8;}
+      .fig-input{width:9.5rem;}
+      .oct-input{width:3.4rem;}
+      .del-btn{
+        background:none;border:1px solid var(--line);border-radius:3px;
+        color:var(--accent); cursor:pointer; font-size:.9rem; width:1.8rem; height:1.8rem;
+        line-height:1;
+      }
+      .del-btn:hover{background:var(--accent); color:#fff; border-color:var(--accent);}
 
-  .btnbar{display:flex; gap:.6rem; margin-top:1rem; flex-wrap:wrap;}
-  button.primary, button.secondary{
-    font-family:"Helvetica Neue",Arial,sans-serif;
-    font-size:.78rem;
-    letter-spacing:.06em;
-    text-transform:uppercase;
-    padding:.55rem 1.1rem;
-    border-radius:3px;
-    cursor:pointer;
-    border:1px solid var(--ink);
-  }
-  button.primary{background:var(--accent); color:#fdfbf5; border-color:var(--accent);}
-  button.primary:hover{background:#5f2323;}
-  button.secondary{background:transparent; color:var(--ink); }
-  button.secondary:hover{background:rgba(0,0,0,.05);}
+      .btnbar{display:flex; gap:.6rem; margin-top:1rem; flex-wrap:wrap;}
+      button.primary, button.secondary{
+        font-family:"Helvetica Neue",Arial,sans-serif;
+        font-size:.78rem;
+        letter-spacing:.06em;
+        text-transform:uppercase;
+        padding:.55rem 1.1rem;
+        border-radius:3px;
+        cursor:pointer;
+        border:1px solid var(--ink);
+      }
+      button.primary{background:var(--accent); color:#fdfbf5; border-color:var(--accent);}
+      button.primary:hover{background:#5f2323;}
+      button.secondary{background:transparent; color:var(--ink); }
+      button.secondary:hover{background:rgba(0,0,0,.05);}
 
-  #score-panel{overflow-x:auto; padding-bottom:1.5rem;}
-  #score-holder{min-width:100%; display:inline-block;}
+      #score-panel{overflow-x:auto; padding-bottom:1.5rem;}
+      #score-holder{min-width:100%; display:inline-block;}
 
-  .legend{
-    display:flex; flex-wrap:wrap; gap:.5rem 1.2rem;
-    font-family:"Helvetica Neue",Arial,sans-serif;
-    font-size:.78rem; color:var(--ink-soft); margin-top:.6rem;
-  }
-  .legend b{color:var(--ink);}
+      .legend{
+        display:flex; flex-wrap:wrap; gap:.5rem 1.2rem;
+        font-family:"Helvetica Neue",Arial,sans-serif;
+        font-size:.78rem; color:var(--ink-soft); margin-top:.6rem;
+      }
+      .legend b{color:var(--ink);}
 
-  .tones-list{
-    font-family:"Helvetica Neue",Arial,sans-serif;
-    font-size:.8rem;
-    color:var(--ink-soft);
-    display:flex; flex-direction:column; gap:.35rem; margin-top:.6rem;
-  }
-  .tones-list .row{
-    display:flex; gap:.6rem; align-items:baseline;
-    border-left:2px solid var(--brass); padding-left:.6rem;
-  }
-  .tones-list .idx{color:var(--accent-soft); font-weight:600; width:1.4rem;}
-  .tones-list .fig{color:var(--accent); font-weight:600;}
-  .tones-list .tones{color:var(--ink);}
+      .tones-list{
+        font-family:"Helvetica Neue",Arial,sans-serif;
+        font-size:.8rem;
+        color:var(--ink-soft);
+        display:flex; flex-direction:column; gap:.35rem; margin-top:.6rem;
+      }
+      .tones-list .row{
+        display:flex; gap:.6rem; align-items:baseline;
+        border-left:2px solid var(--brass); padding-left:.6rem;
+      }
+      .tones-list .idx{color:var(--accent-soft); font-weight:600; width:1.4rem;}
+      .tones-list .fig{color:var(--accent); font-weight:600;}
+      .tones-list .tones{color:var(--ink);}
 
-  .help{
-    font-family:"Helvetica Neue",Arial,sans-serif;
-    font-size:.74rem; line-height:1.6; color:var(--ink-soft);
-  }
-  .help code{
-    background:#fdfbf5; border:1px solid var(--line); padding:.05rem .3rem;
-    border-radius:2px; color:var(--accent);
-  }
-  footer{
-    text-align:center; font-size:.7rem; color:var(--ink-soft);
-    margin-top:2rem; font-family:"Helvetica Neue",Arial,sans-serif;
-    letter-spacing:.05em;
-  }
-</style>
-</head>
-<body>
-<div class="wrap">
+      .help{
+        font-family:"Helvetica Neue",Arial,sans-serif;
+        font-size:.74rem; line-height:1.6; color:var(--ink-soft);
+      }
+      .help code{
+        background:#fdfbf5; border:1px solid var(--line); padding:.05rem .3rem;
+        border-radius:2px; color:var(--accent);
+      }
+      footer{
+        text-align:center; font-size:.7rem; color:var(--ink-soft);
+        margin-top:2rem; font-family:"Helvetica Neue",Arial,sans-serif;
+        letter-spacing:.05em;
+      }
+    </style>
+  </head>
+  <body>
+    <div class="wrap">
 
-  <header>
-    <h1>通奏低音レアリゼーション<br><small>Figured Bass Realization &amp; Harmony Visualizer</small></h1>
-    <span class="figbass-mark">6 / 6-4 / 7 / 6-5 / 4-3 / 9 …</span>
-  </header>
+      <header>
+        <h1>通奏低音レアリゼーション<br><small>Figured Bass Realization &amp; Harmony Visualizer</small></h1>
+        <span class="figbass-mark">6 / 6-4 / 7 / 6-5 / 4-3 / 9 …</span>
+      </header>
 
-  <div class="panel">
-    <p class="panel-title">調 &nbsp;Key</p>
-    <div class="key-row">
-      <label for="keySelect">調性</label>
-      <select id="keySelect"></select>
-      <span class="help">短調は自然短音階を基準に度数計算します。</span>
+      <div class="panel">
+        <p class="panel-title">調 &nbsp;Key</p>
+        <div class="key-row">
+          <label for="keySelect">調性</label>
+          <select id="keySelect"></select>
+          <span class="help">短調は自然短音階を基準に度数計算します。</span>
+        </div>
+      </div>
+
+      <div class="panel">
+        <p class="panel-title">低音進行の入力 &nbsp;Bass Line Input</p>
+        <table class="rows" id="rowsTable">
+          <thead>
+            <tr>
+              <th>#</th><th>音名</th><th>変化</th><th>Oct</th><th>音価</th><th>数字（figures）</th><th></th>
+            </tr>
+          </thead>
+          <tbody id="rowsBody"></tbody>
+        </table>
+        <div class="btnbar">
+          <button class="secondary" id="addRowBtn" type="button">＋ 行を追加</button>
+          <button class="primary" id="generateBtn" type="button">五線譜を生成 ▸</button>
+        </div>
+        <p class="help" style="margin-top:.9rem;">
+          数字の書式例：無し(5/3の三和音) / <code>6</code> / <code>6/4</code> / <code>7</code> / <code>6/5</code> /
+          <code>4/3</code> / <code>4/2</code>（または<code>2</code>） / <code>9</code> / <code>7/9</code> /
+          <code>4-3</code>（掛留）/ <code>7-6</code> / <code>9-8</code> / 単独の変化記号 <code>#</code> <code>b</code>（第3音の変化）/
+          増六和音 <code>it6</code> <code>fr6</code> <code>ger6</code>。<br>
+          それ以外の任意の組み合わせ（例：<code>#4</code>, <code>b7</code>, <code>2 4 6</code>）も度数として直接解釈されます。
+        </p>
+        <p class="help">
+          <b>低音進行の配置ルール：</b>2番目以降の低音は、直前の低音との音程を増5度（8半音）以内にしてください（1番目の低音は加線にはみ出しても構いません）。
+          違反すると「五線譜を生成」時にエラーが表示されます。<br>
+          <b>短調でVの和音（属和音）を入力する行</b>では、数字欄の下に導音の扱い（自然短音階のままにする／♯3にして導音化する）を選ぶオプションが表示されます。
+        </p>
+      </div>
+
+      <div class="panel" id="score-panel">
+        <p class="panel-title">大譜表 &nbsp;Score</p>
+        <div id="score-holder"></div>
+        <div class="legend">
+          <span><b>高音部の点</b>＝その和音構成音に一致する全てのピッチ（オクターブ4〜5の範囲）</span>
+          <span><b>低音部</b>＝入力された低音音符</span>
+        </div>
+      </div>
+
+      <div class="panel">
+        <p class="panel-title">解析結果 &nbsp;Resolved Tones</p>
+        <div class="tones-list" id="tonesList"></div>
+      </div>
+
+      <footer>作成 - INUNUM &amp; 佐々木崇紘 E-MAIL 0122t.sasaki@gmail.com</footer>
     </div>
-  </div>
 
-  <div class="panel">
-    <p class="panel-title">低音進行の入力 &nbsp;Bass Line Input</p>
-    <table class="rows" id="rowsTable">
-      <thead>
-        <tr>
-          <th>#</th><th>音名</th><th>変化</th><th>Oct</th><th>音価</th><th>数字（figures）</th><th></th>
-        </tr>
-      </thead>
-      <tbody id="rowsBody"></tbody>
-    </table>
-    <div class="btnbar">
-      <button class="secondary" id="addRowBtn" type="button">＋ 行を追加</button>
-      <button class="primary" id="generateBtn" type="button">五線譜を生成 ▸</button>
-    </div>
-    <p class="help" style="margin-top:.9rem;">
-      数字の書式例：無し(5/3の三和音) / <code>6</code> / <code>6/4</code> / <code>7</code> / <code>6/5</code> /
-      <code>4/3</code> / <code>4/2</code>（または<code>2</code>） / <code>9</code> / <code>7/9</code> /
-      <code>4-3</code>（掛留）/ <code>7-6</code> / <code>9-8</code> / 単独の変化記号 <code>#</code> <code>b</code>（第3音の変化）/
-      増六和音 <code>it6</code> <code>fr6</code> <code>ger6</code>。<br>
-      それ以外の任意の組み合わせ（例：<code>#4</code>, <code>b7</code>, <code>2 4 6</code>）も度数として直接解釈されます。
-    </p>
-    <p class="help">
-      <b>低音進行の配置ルール：</b>2番目以降の低音は、直前の低音との音程を増5度（8半音）以内にしてください（1番目の低音は加線にはみ出しても構いません）。
-      違反すると「五線譜を生成」時にエラーが表示されます。<br>
-      <b>短調でVの和音（属和音）を入力する行</b>では、数字欄の下に導音の扱い（自然短音階のままにする／♯3にして導音化する）を選ぶオプションが表示されます。
-    </p>
-  </div>
+    <script>
+    /* =========================================================
+      1. music theory core
+      ========================================================= */
+    const LETTERS = ['C','D','E','F','G','A','B']; // 内部計算用
+    const NOTE_BASE = {C:0,D:2,E:4,F:5,G:7,A:9,B:11};
+    const SHARP_ORDER = ['F','C','G','D','A','E','B'];
+    const FLAT_ORDER  = ['B','E','A','D','G','C','F'];
+    const ACC_VALUE  = {'bb':-2,'b':-1,'':0,'#':1,'##':2};
 
-  <div class="panel" id="score-panel">
-    <p class="panel-title">大譜表 &nbsp;Score</p>
-    <div id="score-holder"></div>
-    <div class="legend">
-      <span><b>高音部の点</b>＝その和音構成音に一致する全てのピッチ（オクターブ4〜5の範囲）</span>
-      <span><b>低音部</b>＝入力された低音音符</span>
-    </div>
-  </div>
+    // ドイツ語音名の取得（表示用）
+    function getGermanNoteName(letter, acc) {
+      if (letter === 'B') { // 英語のB
+        if (acc === 0) return 'H';
+        if (acc === 1) return 'His';
+        if (acc === 2) return 'Hisis';
+        if (acc === -1) return 'B'; // 英語のBb = ドイツ語のB
+        if (acc === -2) return 'Heses';
+      }
+      if (letter === 'E' && acc === -1) return 'Es';
+      if (letter === 'E' && acc === -2) return 'Eses';
+      if (letter === 'A' && acc === -1) return 'As';
+      if (letter === 'A' && acc === -2) return 'Ases';
 
-  <div class="panel">
-    <p class="panel-title">解析結果 &nbsp;Resolved Tones</p>
-    <div class="tones-list" id="tonesList"></div>
-  </div>
-
-  <footer>作成 - INUNUM &amp; 佐々木崇紘 E-MAIL 0122t.sasaki@gmail.com</footer>
-</div>
-
-<script>
-/* =========================================================
-   1. music theory core
-   ========================================================= */
-const LETTERS = ['C','D','E','F','G','A','B']; // 内部計算用
-const NOTE_BASE = {C:0,D:2,E:4,F:5,G:7,A:9,B:11};
-const SHARP_ORDER = ['F','C','G','D','A','E','B'];
-const FLAT_ORDER  = ['B','E','A','D','G','C','F'];
-const ACC_VALUE  = {'bb':-2,'b':-1,'':0,'#':1,'##':2};
-
-// ドイツ語音名の取得（表示用）
-function getGermanNoteName(letter, acc) {
-  if (letter === 'B') { // 英語のB
-    if (acc === 0) return 'H';
-    if (acc === 1) return 'His';
-    if (acc === 2) return 'Hisis';
-    if (acc === -1) return 'B'; // 英語のBb = ドイツ語のB
-    if (acc === -2) return 'Heses';
-  }
-  if (letter === 'E' && acc === -1) return 'Es';
-  if (letter === 'E' && acc === -2) return 'Eses';
-  if (letter === 'A' && acc === -1) return 'As';
-  if (letter === 'A' && acc === -2) return 'Ases';
-
-  let base = letter;
-  if (acc === 1) return base + 'is';
-  if (acc === 2) return base + 'isis';
-  if (acc === -1) return base + 'es';
-  if (acc === -2) return base + 'eses';
-  return base;
-}
-
-// key signature table: sharps positive, flats negative
-const KEY_SIGNATURES = {
-  'C_major':0,'G_major':1,'D_major':2,'A_major':3,'E_major':4,'B_major':5,'F#_major':6,'C#_major':7,
-  'F_major':-1,'Bb_major':-2,'Eb_major':-3,'Ab_major':-4,'Db_major':-5,'Gb_major':-6,'Cb_major':-7,
-  'A_minor':0,'E_minor':1,'B_minor':2,'F#_minor':3,'C#_minor':4,'G#_minor':5,'D#_minor':6,
-  'D_minor':-1,'G_minor':-2,'C_minor':-3,'F_minor':-4,'Bb_minor':-5,'Eb_minor':-6
-};
-
-// ドイツ語表記の調名
-const KEY_LABELS = {
-  'C_major':'ハ長調 C-Dur','G_major':'ト長調 G-Dur','D_major':'ニ長調 D-Dur','A_major':'イ長調 A-Dur',
-  'E_major':'ホ長調 E-Dur','B_major':'ロ長調 H-Dur','F#_major':'嬰ヘ長調 Fis-Dur','C#_major':'嬰ハ長調 Cis-Dur',
-  'F_major':'ヘ長調 F-Dur','Bb_major':'変ロ長調 B-Dur','Eb_major':'変ホ長調 Es-Dur','Ab_major':'変イ長調 As-Dur',
-  'Db_major':'変ニ長調 Des-Dur','Gb_major':'変ト長調 Ges-Dur','Cb_major':'変ハ長調 Ces-Dur',
-  'A_minor':'イ短調 a-Moll','E_minor':'ホ短調 e-Moll','B_minor':'ロ短調 h-Moll','F#_minor':'嬰ヘ短調 fis-Moll',
-  'C#_minor':'嬰ハ短調 cis-Moll','G#_minor':'嬰ト短調 gis-Moll','D#_minor':'嬰ニ短調 dis-Moll',
-  'D_minor':'ニ短調 d-Moll','G_minor':'ト短調 g-Moll','C_minor':'ハ短調 c-Moll','F_minor':'ヘ短調 f-Moll',
-  'Bb_minor':'変ロ短調 b-Moll','Eb_minor':'変ホ短調 es-Moll'
-};
-
-function buildDiatonicScale(keyName, raiseSeventh){
-  // 短調でもデフォルトは自然短音階にするため、明示的に true が渡されない限り上げない
-  if(raiseSeventh === undefined) raiseSeventh = false; 
-  const [tonicRaw, mode] = keyName.split('_');
-  const tonicLetter = tonicRaw[0];
-  const sig = KEY_SIGNATURES[keyName];
-  const startIdx = LETTERS.indexOf(tonicLetter);
-  const accMap = {}; LETTERS.forEach(l=>accMap[l]=0);
-  if(sig>0){ for(let i=0;i<sig;i++) accMap[SHARP_ORDER[i]] += 1; }
-  if(sig<0){ for(let i=0;i<Math.abs(sig);i++) accMap[FLAT_ORDER[i]] -= 1; }
-  const scale = [];
-  for(let i=0;i<7;i++){
-    const letter = LETTERS[(startIdx+i)%7];
-    scale.push({letter, acc: accMap[letter]});
-  }
-  if(mode==='minor' && raiseSeventh){
-    scale[6] = {letter:scale[6].letter, acc:scale[6].acc+1}; // harmonic minor: raised 7th
-  }
-  return scale;
-}
-
-function scaleDegreeOfLetter(letter, scale){
-  const idx = scale.findIndex(s=>s.letter===letter);
-  return idx + 1;
-}
-
-function absSemitone(letter, acc, octave){
-  return octave*12 + NOTE_BASE[letter] + acc;
-}
-
-function pitchClassOf(letter, acc){
-  return ((NOTE_BASE[letter] + acc) % 12 + 12) % 12;
-}
-
-function degreeToPitch(bassLetter, degree, explicitAcc, scale){
-  const bassIdx = scale.findIndex(s=>s.letter===bassLetter);
-  const idx = ((bassIdx + (degree-1)) % 7 + 7) % 7;
-  const letter = scale[idx].letter;
-  const defaultAcc = scale[idx].acc;
-  const acc = (explicitAcc===null || explicitAcc===undefined) ? defaultAcc : explicitAcc;
-  return {letter, acc, pc: pitchClassOf(letter, acc)};
-}
-
-/* ---- figure string parsing ---- */
-function parseToken(tok){
-  tok = tok.trim();
-  if(!tok) return null;
-  let m = tok.match(/^(bb|##|b|#|n)?(\d+)$/i);
-  if(m){
-    const accStr = m[1] ? m[1].toLowerCase() : '';
-    return {degree: parseInt(m[2],10), acc: m[1] ? ACC_VALUE[accStr] : null};
-  }
-  m = tok.match(/^(bb|##|b|#|n)$/i);
-  if(m){
-    return {degree:3, acc: ACC_VALUE[m[1].toLowerCase()]};
-  }
-  return null;
-}
-
-const COMBO_TABLE = {
-  '':[3,5],
-  '6':[3,6],
-  '4,6':[4,6],
-  '7':[3,5,7],
-  '5,6':[3,5,6],
-  '3,4':[3,4,6],
-  '2,4':[2,4,6],
-  '2':[2,4,6],
-  '9':[3,5,7,9],
-  '7,9':[3,5,7,9],
-  '5,9':[3,5,7,9]
-};
-const SUSPENSION_TABLE = {
-  '3,4':[3,4,5],
-  '6,7':[3,6,7],
-  '8,9':[3,5,9],
-  '2,3':[2,3,5]
-};
-const AUGMENTED_SIXTHS = {
-  'it6':[0,4,10], 'it+6':[0,4,10], 'italian6':[0,4,10],
-  'fr6':[0,4,6,10], 'fr+6':[0,4,6,10], 'french6':[0,4,6,10],
-  'ger6':[0,4,7,10], 'ger+6':[0,4,7,10], 'german6':[0,4,7,10]
-};
-
-function parseFigureString(str){
-  const raw = (str||'').trim();
-  const lowerCompact = raw.toLowerCase().replace(/\s+/g,'');
-  if(AUGMENTED_SIXTHS[lowerCompact]){
-    return {type:'absolute', offsets: AUGMENTED_SIXTHS[lowerCompact]};
-  }
-  const hasDash = raw.indexOf('-') !== -1;
-  const tokens = raw.split(/[\/\-\s,]+/).filter(Boolean).map(parseToken).filter(Boolean);
-
-  if(tokens.length===0){
-    return {type:'degrees', entries:[{degree:1,acc:null}].concat(COMBO_TABLE[''].map(d=>({degree:d,acc:null})))};
-  }
-
-  const sortedKey = [...new Set(tokens.map(t=>t.degree))].sort((a,b)=>a-b).join(',');
-  let extraDegrees;
-  if(hasDash && SUSPENSION_TABLE[sortedKey]){
-    extraDegrees = SUSPENSION_TABLE[sortedKey];
-  } else if(COMBO_TABLE[sortedKey]){
-    extraDegrees = COMBO_TABLE[sortedKey];
-  } else {
-    const given = new Set(tokens.map(t=>t.degree));
-    extraDegrees = [...given];
-    if(!given.has(4) && !given.has(6) && !given.has(2) && !given.has(9)){
-      if(!given.has(3)) extraDegrees.push(3);
-      if(!given.has(5)) extraDegrees.push(5);
+      let base = letter;
+      if (acc === 1) return base + 'is';
+      if (acc === 2) return base + 'isis';
+      if (acc === -1) return base + 'es';
+      if (acc === -2) return base + 'eses';
+      return base;
     }
-  }
-  const accByDegree = {};
-  tokens.forEach(t=>{ if(t.acc!==null) accByDegree[t.degree]=t.acc; });
-  const entries = [{degree:1, acc:null}];
-  const seen = new Set([1]);
-  extraDegrees.forEach(d=>{
-    if(seen.has(d)) return;
-    seen.add(d);
-    entries.push({degree:d, acc: (d in accByDegree)? accByDegree[d] : null});
-  });
-  return {type:'degrees', entries};
-}
 
-function resolveChordTones(bassLetter, bassAcc, figureStr, scale){
-  const parsed = parseFigureString(figureStr);
-  const bassPc = pitchClassOf(bassLetter, bassAcc);
-  let tones = []; 
-  if(parsed.type==='absolute'){
-    tones.push({letter:bassLetter, acc:bassAcc, pc:bassPc});
-    parsed.offsets.slice(1).forEach(off=>{
-      const pc = ((bassPc+off)%12+12)%12;
-      tones.push({letter:null, acc:null, pc});
-    });
-  } else {
-    parsed.entries.forEach(e=>{
-      if(e.degree===1){
-        tones.push({letter:bassLetter, acc: e.acc===null? bassAcc : e.acc, pc: pitchClassOf(bassLetter, e.acc===null?bassAcc:e.acc)});
+    // key signature table: sharps positive, flats negative
+    const KEY_SIGNATURES = {
+      'C_major':0,'G_major':1,'D_major':2,'A_major':3,'E_major':4,'B_major':5,'F#_major':6,'C#_major':7,
+      'F_major':-1,'Bb_major':-2,'Eb_major':-3,'Ab_major':-4,'Db_major':-5,'Gb_major':-6,'Cb_major':-7,
+      'A_minor':0,'E_minor':1,'B_minor':2,'F#_minor':3,'C#_minor':4,'G#_minor':5,'D#_minor':6,
+      'D_minor':-1,'G_minor':-2,'C_minor':-3,'F_minor':-4,'Bb_minor':-5,'Eb_minor':-6
+    };
+
+    // ドイツ語表記の調名
+    const KEY_LABELS = {
+      'C_major':'ハ長調 C-Dur','G_major':'ト長調 G-Dur','D_major':'ニ長調 D-Dur','A_major':'イ長調 A-Dur',
+      'E_major':'ホ長調 E-Dur','B_major':'ロ長調 H-Dur','F#_major':'嬰ヘ長調 Fis-Dur','C#_major':'嬰ハ長調 Cis-Dur',
+      'F_major':'ヘ長調 F-Dur','Bb_major':'変ロ長調 B-Dur','Eb_major':'変ホ長調 Es-Dur','Ab_major':'変イ長調 As-Dur',
+      'Db_major':'変ニ長調 Des-Dur','Gb_major':'変ト長調 Ges-Dur','Cb_major':'変ハ長調 Ces-Dur',
+      'A_minor':'イ短調 a-Moll','E_minor':'ホ短調 e-Moll','B_minor':'ロ短調 h-Moll','F#_minor':'嬰ヘ短調 fis-Moll',
+      'C#_minor':'嬰ハ短調 cis-Moll','G#_minor':'嬰ト短調 gis-Moll','D#_minor':'嬰ニ短調 dis-Moll',
+      'D_minor':'ニ短調 d-Moll','G_minor':'ト短調 g-Moll','C_minor':'ハ短調 c-Moll','F_minor':'ヘ短調 f-Moll',
+      'Bb_minor':'変ロ短調 b-Moll','Eb_minor':'変ホ短調 es-Moll'
+    };
+
+    function buildDiatonicScale(keyName, raiseSeventh){
+      // 短調でもデフォルトは自然短音階にするため、明示的に true が渡されない限り上げない
+      if(raiseSeventh === undefined) raiseSeventh = false; 
+      const [tonicRaw, mode] = keyName.split('_');
+      const tonicLetter = tonicRaw[0];
+      const sig = KEY_SIGNATURES[keyName];
+      const startIdx = LETTERS.indexOf(tonicLetter);
+      const accMap = {}; LETTERS.forEach(l=>accMap[l]=0);
+      if(sig>0){ for(let i=0;i<sig;i++) accMap[SHARP_ORDER[i]] += 1; }
+      if(sig<0){ for(let i=0;i<Math.abs(sig);i++) accMap[FLAT_ORDER[i]] -= 1; }
+      const scale = [];
+      for(let i=0;i<7;i++){
+        const letter = LETTERS[(startIdx+i)%7];
+        scale.push({letter, acc: accMap[letter]});
+      }
+      if(mode==='minor' && raiseSeventh){
+        scale[6] = {letter:scale[6].letter, acc:scale[6].acc+1}; // harmonic minor: raised 7th
+      }
+      return scale;
+    }
+
+    function scaleDegreeOfLetter(letter, scale){
+      const idx = scale.findIndex(s=>s.letter===letter);
+      return idx + 1;
+    }
+
+    function absSemitone(letter, acc, octave){
+      return octave*12 + NOTE_BASE[letter] + acc;
+    }
+
+    function pitchClassOf(letter, acc){
+      return ((NOTE_BASE[letter] + acc) % 12 + 12) % 12;
+    }
+
+    function degreeToPitch(bassLetter, degree, explicitAcc, scale){
+      const bassIdx = scale.findIndex(s=>s.letter===bassLetter);
+      const idx = ((bassIdx + (degree-1)) % 7 + 7) % 7;
+      const letter = scale[idx].letter;
+      const defaultAcc = scale[idx].acc;
+      const acc = (explicitAcc===null || explicitAcc===undefined) ? defaultAcc : explicitAcc;
+      return {letter, acc, pc: pitchClassOf(letter, acc)};
+    }
+
+    /* ---- figure string parsing ---- */
+    function parseToken(tok){
+      tok = tok.trim();
+      if(!tok) return null;
+      let m = tok.match(/^(bb|##|b|#|n)?(\d+)$/i);
+      if(m){
+        const accStr = m[1] ? m[1].toLowerCase() : '';
+        return {degree: parseInt(m[2],10), acc: m[1] ? ACC_VALUE[accStr] : null};
+      }
+      m = tok.match(/^(bb|##|b|#|n)$/i);
+      if(m){
+        return {degree:3, acc: ACC_VALUE[m[1].toLowerCase()]};
+      }
+      return null;
+    }
+
+    const COMBO_TABLE = {
+      '':[3,5],
+      '6':[3,6],
+      '4,6':[4,6],
+      '7':[3,5,7],
+      '5,6':[3,5,6],
+      '3,4':[3,4,6],
+      '2,4':[2,4,6],
+      '2':[2,4,6],
+      '9':[3,5,7,9],
+      '7,9':[3,5,7,9],
+      '5,9':[3,5,7,9]
+    };
+    const SUSPENSION_TABLE = {
+      '3,4':[3,4,5],
+      '6,7':[3,6,7],
+      '8,9':[3,5,9],
+      '2,3':[2,3,5]
+    };
+    const AUGMENTED_SIXTHS = {
+      'it6':[0,4,10], 'it+6':[0,4,10], 'italian6':[0,4,10],
+      'fr6':[0,4,6,10], 'fr+6':[0,4,6,10], 'french6':[0,4,6,10],
+      'ger6':[0,4,7,10], 'ger+6':[0,4,7,10], 'german6':[0,4,7,10]
+    };
+
+    function parseFigureString(str){
+      const raw = (str||'').trim();
+      const lowerCompact = raw.toLowerCase().replace(/\s+/g,'');
+      if(AUGMENTED_SIXTHS[lowerCompact]){
+        return {type:'absolute', offsets: AUGMENTED_SIXTHS[lowerCompact]};
+      }
+      const hasDash = raw.indexOf('-') !== -1;
+      const tokens = raw.split(/[\/\-\s,]+/).filter(Boolean).map(parseToken).filter(Boolean);
+
+      if(tokens.length===0){
+        return {type:'degrees', entries:[{degree:1,acc:null}].concat(COMBO_TABLE[''].map(d=>({degree:d,acc:null})))};
+      }
+
+      const sortedKey = [...new Set(tokens.map(t=>t.degree))].sort((a,b)=>a-b).join(',');
+      let extraDegrees;
+      if(hasDash && SUSPENSION_TABLE[sortedKey]){
+        extraDegrees = SUSPENSION_TABLE[sortedKey];
+      } else if(COMBO_TABLE[sortedKey]){
+        extraDegrees = COMBO_TABLE[sortedKey];
       } else {
-        const t = degreeToPitch(bassLetter, e.degree, e.acc, scale);
-        tones.push(t);
+        const given = new Set(tokens.map(t=>t.degree));
+        extraDegrees = [...given];
+        if(!given.has(4) && !given.has(6) && !given.has(2) && !given.has(9)){
+          if(!given.has(3)) extraDegrees.push(3);
+          if(!given.has(5)) extraDegrees.push(5);
+        }
       }
-    });
-  }
-  return tones;
-}
-
-/* =========================================================
-   2. UI state & row management
-   ========================================================= */
-const rowsBody = document.getElementById('rowsBody');
-const keySelect = document.getElementById('keySelect');
-let rowCounter = 0;
-
-Object.keys(KEY_LABELS).forEach(k=>{
-  const opt = document.createElement('option');
-  opt.value = k; opt.textContent = KEY_LABELS[k];
-  if(k==='C_major') opt.selected = true;
-  keySelect.appendChild(opt);
-});
-keySelect.addEventListener('change', ()=>updateLeadingToneOptions());
-
-function addRow(preset){
-  preset = preset || {};
-  rowCounter++;
-  const tr = document.createElement('tr');
-  tr.dataset.id = rowCounter;
-  tr.innerHTML = `
-    <td>${rowCounter}</td>
-    <td>
-      <select class="letterSel">
-        ${LETTERS.map(l=>`<option value="${l}" ${preset.letter===l?'selected':''}>${l==='B'?'H':l}</option>`).join('')}
-      </select>
-    </td>
-    <td>
-      <select class="accSel">
-        <option value="-2" ${preset.acc===-2?'selected':''}>♭♭</option>
-        <option value="-1" ${preset.acc===-1?'selected':''}>♭</option>
-        <option value="0" ${(preset.acc===0||preset.acc===undefined)?'selected':''}>―</option>
-        <option value="1" ${preset.acc===1?'selected':''}>♯</option>
-        <option value="2" ${preset.acc===2?'selected':''}>♯♯</option>
-      </select>
-    </td>
-    <td><input type="number" class="oct-input octInput" min="1" max="6" value="${preset.oct||3}"></td>
-    <td>
-      <select class="durSel">
-        <option value="w" ${preset.dur==='w'?'selected':''}>全音符</option>
-        <option value="h" ${preset.dur==='h'?'selected':''}>2分音符</option>
-        <option value="q" ${(preset.dur==='q'||!preset.dur)?'selected':''}>4分音符</option>
-        <option value="8" ${preset.dur==='8'?'selected':''}>8分音符</option>
-      </select>
-    </td>
-    <td>
-      <input type="text" class="fig-input figInput" placeholder="例: 6/4" value="${preset.fig||''}"><br>
-      <select class="leadingToneSel" style="display:none; margin-top:.3rem; font-size:.75rem;">
-        <option value="natural">V: 自然(♭3・導音化しない)</option>
-        <option value="raised">V: 導音(♯3)</option>
-      </select>
-    </td>
-    <td><button type="button" class="del-btn" title="削除">×</button></td>
-  `;
-  tr.querySelector('.del-btn').addEventListener('click', ()=>{ tr.remove(); });
-  tr.querySelector('.letterSel').addEventListener('change', updateLeadingToneOptions);
-  tr.querySelector('.accSel').addEventListener('change', updateLeadingToneOptions);
-  rowsBody.appendChild(tr);
-  updateLeadingToneOptions();
-}
-
-function updateLeadingToneOptions(){
-  const keyName = keySelect.value;
-  const mode = keyName.split('_')[1];
-  // 導音判定用のスケールは自然短音階のままで5度(V)を見つけるため false を指定
-  const scaleRef = buildDiatonicScale(keyName, false);
-  Array.from(rowsBody.querySelectorAll('tr')).forEach(tr=>{
-    const letter = tr.querySelector('.letterSel').value;
-    const sel = tr.querySelector('.leadingToneSel');
-    const degree = scaleDegreeOfLetter(letter, scaleRef);
-    if(mode==='minor' && degree===5){
-      sel.style.display = '';
-    } else {
-      sel.style.display = 'none';
-      sel.value = 'natural'; // デフォルト状態
-    }
-  });
-}
-
-document.getElementById('addRowBtn').addEventListener('click', ()=>addRow());
-
-// initial demo rows
-addRow({letter:'C', acc:0, oct:3, dur:'q', fig:''});
-addRow({letter:'B', acc:0, oct:2, dur:'q', fig:'6'});
-addRow({letter:'E', acc:0, oct:3, dur:'q', fig:'6'});
-addRow({letter:'D', acc:0, oct:3, dur:'q', fig:'6/5'});
-addRow({letter:'G', acc:0, oct:2, dur:'q', fig:'7'});
-addRow({letter:'C', acc:0, oct:3, dur:'q', fig:''});
-
-/* =========================================================
-   3. VexFlow rendering
-   ========================================================= */
-const ACC_TO_VEX = {'-2':'bb','-1':'b','0':null,'1':'#','2':'##'};
-
-function vexKey(letter, acc, octave){
-  // VexFlow requires English letter logic internally
-  const sym = ACC_TO_VEX[String(acc)] || '';
-  return `${letter.toLowerCase()}${sym}/${octave}`;
-}
-
-const FIGURE_SPECIAL_LABELS = {
-  'it6':'It+6','it+6':'It+6','italian6':'It+6',
-  'fr6':'Fr+6','fr+6':'Fr+6','french6':'Fr+6',
-  'ger6':'Ger+6','ger+6':'Ger+6','german6':'Ger+6'
-};
-function figureDisplayLines(str){
-  const raw = (str||'').trim();
-  if(!raw) return [];
-  const lower = raw.toLowerCase().replace(/\s+/g,'');
-  if(FIGURE_SPECIAL_LABELS[lower]) return [FIGURE_SPECIAL_LABELS[lower]];
-  return raw.split(/[\/\s]+/).filter(Boolean);
-}
-
-function keyNameToVexSig(keyName){
-  const [tonicRaw, mode] = keyName.split('_');
-  return mode==='minor' ? tonicRaw+'m' : tonicRaw;
-}
-
-function validateBassLine(bassEntries){
-  if(bassEntries.length===0) return null;
-  for(let i=1;i<bassEntries.length;i++){
-    const prev = bassEntries[i-1], cur = bassEntries[i];
-    const s1 = absSemitone(prev.letter, prev.acc, prev.oct);
-    const s2 = absSemitone(cur.letter, cur.acc, cur.oct);
-    const diff = Math.abs(s2-s1);
-    if(diff > 8){
-      const prevName = getGermanNoteName(prev.letter, prev.acc);
-      const curName = getGermanNoteName(cur.letter, cur.acc);
-      return `${i+1}番目の低音（${curName}${cur.oct}）が直前の低音（${prevName}${prev.oct}）との音程で増5度（8半音）を超えています（実際の差：${diff}半音）。低音同士の跳躍は増5度以内に収めてください。`;
-    }
-  }
-  return null;
-}
-
-function generateScore(){
-  if(typeof Vex === 'undefined' || !Vex.Flow){
-    throw new Error('VexFlowライブラリの読み込みに失敗しました。');
-  }
-  const holder = document.getElementById('score-holder');
-  const tonesList = document.getElementById('tonesList');
-
-  const rows = Array.from(rowsBody.querySelectorAll('tr'));
-  if(rows.length===0){ return; }
-
-  const keyName = keySelect.value;
-  const scaleNatural = buildDiatonicScale(keyName, false);  // natural minor (default)
-  const scaleRaised  = buildDiatonicScale(keyName, true);   // harmonic minor 
-
-  const bassEntries = [];
-  rows.forEach((tr, i)=>{
-    const letter = tr.querySelector('.letterSel').value;
-    const acc = parseInt(tr.querySelector('.accSel').value,10);
-    const oct = parseInt(tr.querySelector('.octInput').value,10) || 3;
-    const dur = tr.querySelector('.durSel').value;
-    const fig = tr.querySelector('.figInput').value;
-    const leadingToneSel = tr.querySelector('.leadingToneSel');
-    const leadingToneMode = (leadingToneSel.style.display !== 'none') ? leadingToneSel.value : 'natural';
-    bassEntries.push({letter, acc, oct, dur, fig, leadingToneMode, idx:i+1});
-  });
-
-  const validationError = validateBassLine(bassEntries);
-  if(validationError){
-    alert('入力エラー:\n\n' + validationError);
-    return;
-  }
-
-  holder.innerHTML = '';
-  tonesList.innerHTML = '';
-
-  const VF = Vex.Flow;
-  const bassNotes = [];
-  const trebleNotes = [];
-  const summary = [];
-
-  bassEntries.forEach(entry=>{
-    const bKey = vexKey(entry.letter, entry.acc, entry.oct);
-    const bNote = new VF.StaveNote({keys:[bKey], duration:entry.dur, clef:'bass'});
-    const bSym = ACC_TO_VEX[String(entry.acc)];
-    if(bSym) bNote.addModifier(new VF.Accidental(bSym), 0);
-    bassNotes.push(bNote);
-
-    const rowScale = entry.leadingToneMode==='raised' ? scaleRaised : scaleNatural;
-    const tones = resolveChordTones(entry.letter, entry.acc, entry.fig, rowScale);
-    const pcSet = [...new Set(tones.map(t=>t.pc))];
-
-    const spellings = tones.map(t=>{
-      if(t.letter){ return {letter:t.letter, acc:t.acc, pc:t.pc}; }
-      for(const s of rowScale){
-        if(pitchClassOf(s.letter, s.acc)===t.pc) return {letter:s.letter, acc:s.acc, pc:t.pc};
-      }
-      const guessLetters = ['C','C','D','D','E','F','F','G','G','A','A','B'];
-      return {letter:guessLetters[t.pc], acc:0, pc:t.pc};
-    });
-
-    const dotKeys = [];
-    [4,5].forEach(oct=>{
-      spellings.forEach(sp=>{
-        const k = vexKey(sp.letter, sp.acc, oct);
-        if(!dotKeys.includes(k)) dotKeys.push(k);
+      const accByDegree = {};
+      tokens.forEach(t=>{ if(t.acc!==null) accByDegree[t.degree]=t.acc; });
+      const entries = [{degree:1, acc:null}];
+      const seen = new Set([1]);
+      extraDegrees.forEach(d=>{
+        if(seen.has(d)) return;
+        seen.add(d);
+        entries.push({degree:d, acc: (d in accByDegree)? accByDegree[d] : null});
       });
-    });
-    dotKeys.sort((a,b)=>{
-      const oa = parseInt(a.split('/')[1],10), ob = parseInt(b.split('/')[1],10);
-      if(oa!==ob) return oa-ob;
-      return a.localeCompare(b);
-    });
+      return {type:'degrees', entries};
+    }
 
-    const tNote = new VF.StaveNote({keys:dotKeys, duration:entry.dur, clef:'treble', auto_stem:true});
-    dotKeys.forEach((k, i)=>{
-      const accPart = k.slice(1, k.indexOf('/'));
-      const vAcc = accPart==='' ? null : accPart;
-      if(vAcc){
-        const accidental = new VF.Accidental(vAcc);
-        accidental.setXShift(-14);
-        tNote.addModifier(accidental, i);
+    function resolveChordTones(bassLetter, bassAcc, figureStr, scale){
+      const parsed = parseFigureString(figureStr);
+      const bassPc = pitchClassOf(bassLetter, bassAcc);
+      let tones = []; 
+      if(parsed.type==='absolute'){
+        tones.push({letter:bassLetter, acc:bassAcc, pc:bassPc});
+        parsed.offsets.slice(1).forEach(off=>{
+          const pc = ((bassPc+off)%12+12)%12;
+          tones.push({letter:null, acc:null, pc});
+        });
+      } else {
+        parsed.entries.forEach(e=>{
+          if(e.degree===1){
+            tones.push({letter:bassLetter, acc: e.acc===null? bassAcc : e.acc, pc: pitchClassOf(bassLetter, e.acc===null?bassAcc:e.acc)});
+          } else {
+            const t = degreeToPitch(bassLetter, e.degree, e.acc, scale);
+            tones.push(t);
+          }
+        });
       }
-      tNote.setKeyStyle(i, {fillStyle: '#7a2e2e', strokeStyle:'#7a2e2e'});
+      return tones;
+    }
+
+    /* =========================================================
+      2. UI state & row management
+      ========================================================= */
+    const rowsBody = document.getElementById('rowsBody');
+    const keySelect = document.getElementById('keySelect');
+    let rowCounter = 0;
+
+    Object.keys(KEY_LABELS).forEach(k=>{
+      const opt = document.createElement('option');
+      opt.value = k; opt.textContent = KEY_LABELS[k];
+      if(k==='C_major') opt.selected = true;
+      keySelect.appendChild(opt);
     });
-    tNote.setStemStyle && tNote.setStemStyle({strokeStyle:'rgba(0,0,0,0)'});
-    tNote.render_options.stroke_style = 'rgba(0,0,0,0)';
-    trebleNotes.push(tNote);
+    keySelect.addEventListener('change', ()=>updateLeadingToneOptions());
 
-    summary.push({
-      idx: entry.idx, 
-      bass: `${getGermanNoteName(entry.letter, entry.acc)}${entry.oct}`, 
-      fig: entry.fig||'(5/3)', 
-      spellings, 
-      pcSet
+    function addRow(preset){
+      preset = preset || {};
+      rowCounter++;
+      const tr = document.createElement('tr');
+      tr.dataset.id = rowCounter;
+      tr.innerHTML = `
+        <td>${rowCounter}</td>
+        <td>
+          <select class="letterSel">
+            ${LETTERS.map(l=>`<option value="${l}" ${preset.letter===l?'selected':''}>${l==='B'?'H':l}</option>`).join('')}
+          </select>
+        </td>
+        <td>
+          <select class="accSel">
+            <option value="-2" ${preset.acc===-2?'selected':''}>♭♭</option>
+            <option value="-1" ${preset.acc===-1?'selected':''}>♭</option>
+            <option value="0" ${(preset.acc===0||preset.acc===undefined)?'selected':''}>―</option>
+            <option value="1" ${preset.acc===1?'selected':''}>♯</option>
+            <option value="2" ${preset.acc===2?'selected':''}>♯♯</option>
+          </select>
+        </td>
+        <td><input type="number" class="oct-input octInput" min="1" max="6" value="${preset.oct||3}"></td>
+        <td>
+          <select class="durSel">
+            <option value="w" ${preset.dur==='w'?'selected':''}>全音符</option>
+            <option value="h" ${preset.dur==='h'?'selected':''}>2分音符</option>
+            <option value="q" ${(preset.dur==='q'||!preset.dur)?'selected':''}>4分音符</option>
+            <option value="8" ${preset.dur==='8'?'selected':''}>8分音符</option>
+          </select>
+        </td>
+        <td>
+          <input type="text" class="fig-input figInput" placeholder="例: 6/4" value="${preset.fig||''}"><br>
+          <select class="leadingToneSel" style="display:none; margin-top:.3rem; font-size:.75rem;">
+            <option value="natural">V: 自然(♭3・導音化しない)</option>
+            <option value="raised">V: 導音(♯3)</option>
+          </select>
+        </td>
+        <td><button type="button" class="del-btn" title="削除">×</button></td>
+      `;
+      tr.querySelector('.del-btn').addEventListener('click', ()=>{ tr.remove(); });
+      tr.querySelector('.letterSel').addEventListener('change', updateLeadingToneOptions);
+      tr.querySelector('.accSel').addEventListener('change', updateLeadingToneOptions);
+      rowsBody.appendChild(tr);
+      updateLeadingToneOptions();
+    }
+
+    function updateLeadingToneOptions(){
+      const keyName = keySelect.value;
+      const mode = keyName.split('_')[1];
+      // 導音判定用のスケールは自然短音階のままで5度(V)を見つけるため false を指定
+      const scaleRef = buildDiatonicScale(keyName, false);
+      Array.from(rowsBody.querySelectorAll('tr')).forEach(tr=>{
+        const letter = tr.querySelector('.letterSel').value;
+        const sel = tr.querySelector('.leadingToneSel');
+        const degree = scaleDegreeOfLetter(letter, scaleRef);
+        if(mode==='minor' && degree===5){
+          sel.style.display = '';
+        } else {
+          sel.style.display = 'none';
+          sel.value = 'natural'; // デフォルト状態
+        }
+      });
+    }
+
+    document.getElementById('addRowBtn').addEventListener('click', ()=>addRow());
+
+    // initial demo rows
+    addRow({letter:'C', acc:0, oct:3, dur:'q', fig:''});
+    addRow({letter:'B', acc:0, oct:2, dur:'q', fig:'6'});
+    addRow({letter:'E', acc:0, oct:3, dur:'q', fig:'6'});
+    addRow({letter:'D', acc:0, oct:3, dur:'q', fig:'6/5'});
+    addRow({letter:'G', acc:0, oct:2, dur:'q', fig:'7'});
+    addRow({letter:'C', acc:0, oct:3, dur:'q', fig:''});
+
+    /* =========================================================
+      3. VexFlow rendering
+      ========================================================= */
+    const ACC_TO_VEX = {'-2':'bb','-1':'b','0':null,'1':'#','2':'##'};
+
+    function vexKey(letter, acc, octave){
+      // VexFlow requires English letter logic internally
+      const sym = ACC_TO_VEX[String(acc)] || '';
+      return `${letter.toLowerCase()}${sym}/${octave}`;
+    }
+
+    const FIGURE_SPECIAL_LABELS = {
+      'it6':'It+6','it+6':'It+6','italian6':'It+6',
+      'fr6':'Fr+6','fr+6':'Fr+6','french6':'Fr+6',
+      'ger6':'Ger+6','ger+6':'Ger+6','german6':'Ger+6'
+    };
+    function figureDisplayLines(str){
+      const raw = (str||'').trim();
+      if(!raw) return [];
+      const lower = raw.toLowerCase().replace(/\s+/g,'');
+      if(FIGURE_SPECIAL_LABELS[lower]) return [FIGURE_SPECIAL_LABELS[lower]];
+      return raw.split(/[\/\s]+/).filter(Boolean);
+    }
+
+    function keyNameToVexSig(keyName){
+      const [tonicRaw, mode] = keyName.split('_');
+      return mode==='minor' ? tonicRaw+'m' : tonicRaw;
+    }
+
+    function validateBassLine(bassEntries){
+      if(bassEntries.length===0) return null;
+      for(let i=1;i<bassEntries.length;i++){
+        const prev = bassEntries[i-1], cur = bassEntries[i];
+        const s1 = absSemitone(prev.letter, prev.acc, prev.oct);
+        const s2 = absSemitone(cur.letter, cur.acc, cur.oct);
+        const diff = Math.abs(s2-s1);
+        if(diff > 8){
+          const prevName = getGermanNoteName(prev.letter, prev.acc);
+          const curName = getGermanNoteName(cur.letter, cur.acc);
+          return `${i+1}番目の低音（${curName}${cur.oct}）が直前の低音（${prevName}${prev.oct}）との音程で増5度（8半音）を超えています（実際の差：${diff}半音）。低音同士の跳躍は増5度以内に収めてください。`;
+        }
+      }
+      return null;
+    }
+
+    function generateScore(){
+      if(typeof Vex === 'undefined' || !Vex.Flow){
+        throw new Error('VexFlowライブラリの読み込みに失敗しました。');
+      }
+      const holder = document.getElementById('score-holder');
+      const tonesList = document.getElementById('tonesList');
+
+      const rows = Array.from(rowsBody.querySelectorAll('tr'));
+      if(rows.length===0){ return; }
+
+      const keyName = keySelect.value;
+      const scaleNatural = buildDiatonicScale(keyName, false);  // natural minor (default)
+      const scaleRaised  = buildDiatonicScale(keyName, true);   // harmonic minor 
+
+      const bassEntries = [];
+      rows.forEach((tr, i)=>{
+        const letter = tr.querySelector('.letterSel').value;
+        const acc = parseInt(tr.querySelector('.accSel').value,10);
+        const oct = parseInt(tr.querySelector('.octInput').value,10) || 3;
+        const dur = tr.querySelector('.durSel').value;
+        const fig = tr.querySelector('.figInput').value;
+        const leadingToneSel = tr.querySelector('.leadingToneSel');
+        const leadingToneMode = (leadingToneSel.style.display !== 'none') ? leadingToneSel.value : 'natural';
+        bassEntries.push({letter, acc, oct, dur, fig, leadingToneMode, idx:i+1});
+      });
+
+      const validationError = validateBassLine(bassEntries);
+      if(validationError){
+        alert('入力エラー:\n\n' + validationError);
+        return;
+      }
+
+      holder.innerHTML = '';
+      tonesList.innerHTML = '';
+
+      const VF = Vex.Flow;
+      const bassNotes = [];
+      const trebleNotes = [];
+      const summary = [];
+
+      bassEntries.forEach(entry=>{
+        const bKey = vexKey(entry.letter, entry.acc, entry.oct);
+        const bNote = new VF.StaveNote({keys:[bKey], duration:entry.dur, clef:'bass'});
+        const bSym = ACC_TO_VEX[String(entry.acc)];
+        if(bSym) bNote.addModifier(new VF.Accidental(bSym), 0);
+        bassNotes.push(bNote);
+
+        const rowScale = entry.leadingToneMode==='raised' ? scaleRaised : scaleNatural;
+        const tones = resolveChordTones(entry.letter, entry.acc, entry.fig, rowScale);
+        const pcSet = [...new Set(tones.map(t=>t.pc))];
+
+        const spellings = tones.map(t=>{
+          if(t.letter){ return {letter:t.letter, acc:t.acc, pc:t.pc}; }
+          for(const s of rowScale){
+            if(pitchClassOf(s.letter, s.acc)===t.pc) return {letter:s.letter, acc:s.acc, pc:t.pc};
+          }
+          const guessLetters = ['C','C','D','D','E','F','F','G','G','A','A','B'];
+          return {letter:guessLetters[t.pc], acc:0, pc:t.pc};
+        });
+
+        const dotKeys = [];
+        [4,5].forEach(oct=>{
+          spellings.forEach(sp=>{
+            const k = vexKey(sp.letter, sp.acc, oct);
+            if(!dotKeys.includes(k)) dotKeys.push(k);
+          });
+        });
+        dotKeys.sort((a,b)=>{
+          const oa = parseInt(a.split('/')[1],10), ob = parseInt(b.split('/')[1],10);
+          if(oa!==ob) return oa-ob;
+          return a.localeCompare(b);
+        });
+
+        const tNote = new VF.StaveNote({keys:dotKeys, duration:entry.dur, clef:'treble', auto_stem:true});
+        dotKeys.forEach((k, i)=>{
+          const accPart = k.slice(1, k.indexOf('/'));
+          const vAcc = accPart==='' ? null : accPart;
+          if(vAcc){
+            const accidental = new VF.Accidental(vAcc);
+            accidental.setXShift(-14);
+            tNote.addModifier(accidental, i);
+          }
+          tNote.setKeyStyle(i, {fillStyle: '#7a2e2e', strokeStyle:'#7a2e2e'});
+        });
+        tNote.setStemStyle && tNote.setStemStyle({strokeStyle:'rgba(0,0,0,0)'});
+        tNote.render_options.stroke_style = 'rgba(0,0,0,0)';
+        trebleNotes.push(tNote);
+
+        summary.push({
+          idx: entry.idx, 
+          bass: `${getGermanNoteName(entry.letter, entry.acc)}${entry.oct}`, 
+          fig: entry.fig||'(5/3)', 
+          spellings, 
+          pcSet
+        });
+      });
+
+      const bassVoice = new VF.Voice({num_beats: bassEntries.length, beat_value:4}).setStrict(false);
+      bassVoice.addTickables(bassNotes);
+      const trebleVoice = new VF.Voice({num_beats: bassEntries.length, beat_value:4}).setStrict(false);
+      trebleVoice.addTickables(trebleNotes);
+
+      const formatter = new VF.Formatter();
+      formatter.joinVoices([trebleVoice]);
+      formatter.joinVoices([bassVoice]);
+      const minJustifyWidth = formatter.preCalculateMinTotalWidth([trebleVoice, bassVoice]);
+      const justifyWidth = minJustifyWidth + bassEntries.length*115 + 40;
+      const staveStartPad = 90; 
+      const staveWidth = justifyWidth + staveStartPad + 30;
+      const width = staveWidth + 40;
+      const height = 360;
+
+      const renderer = new VF.Renderer(holder, VF.Renderer.Backends.SVG);
+      renderer.resize(width, height);
+      const ctx = renderer.getContext();
+      ctx.setFont('Georgia', 10);
+
+      const trebleStave = new VF.Stave(20, 30, staveWidth);
+      const bassStave = new VF.Stave(20, 130, staveWidth);
+
+      const vexSig = keyNameToVexSig(keyName);
+      trebleStave.addClef('treble').addKeySignature(vexSig);
+      bassStave.addClef('bass').addKeySignature(vexSig);
+
+      trebleStave.setContext(ctx).draw();
+      bassStave.setContext(ctx).draw();
+
+      const brace = new VF.StaveConnector(trebleStave, bassStave).setType(VF.StaveConnector.type.BRACE);
+      brace.setContext(ctx).draw();
+      const lineLeft = new VF.StaveConnector(trebleStave, bassStave).setType(VF.StaveConnector.type.SINGLE_LEFT);
+      lineLeft.setContext(ctx).draw();
+      const lineRight = new VF.StaveConnector(trebleStave, bassStave).setType(VF.StaveConnector.type.SINGLE_RIGHT);
+      lineRight.setContext(ctx).draw();
+
+      formatter.format([trebleVoice, bassVoice], justifyWidth);
+
+      trebleVoice.draw(ctx, trebleStave);
+      bassVoice.draw(ctx, bassStave);
+
+      let maxBottom = bassStave.getYForLine(4);
+      bassNotes.forEach(note=>{
+        const bb = note.getBoundingBox && note.getBoundingBox();
+        if(bb) maxBottom = Math.max(maxBottom, bb.y + bb.h);
+      });
+      const figureStartY = maxBottom + 16;
+      const lineHeight = 15;
+
+      bassNotes.forEach((note, i)=>{
+        const lines = figureDisplayLines(bassEntries[i].fig);
+        if(lines.length===0) return;
+        const noteX = note.getAbsoluteX();
+        ctx.save();
+        ctx.setFont('Georgia', 13, 'bold');
+        ctx.setFillStyle('#7a2e2e');
+        let y = figureStartY;
+        lines.forEach(line=>{
+          const textWidth = (ctx.measureText ? ctx.measureText(line).width : line.length*7);
+          ctx.fillText(line, noteX - textWidth/2 + 4, y);
+          y += lineHeight;
+        });
+        ctx.restore();
+      });
+
+      summary.forEach(s=>{
+        const div = document.createElement('div');
+        div.className = 'row';
+        const spellStr = s.spellings.map(sp => getGermanNoteName(sp.letter, sp.acc)).join(' , ');
+        div.innerHTML = `<span class="idx">${s.idx}</span><span class="fig">${s.bass} [${s.fig}]</span><span class="tones">→ ${spellStr}</span>`;
+        tonesList.appendChild(div);
+      });
+    }
+
+    document.getElementById('generateBtn').addEventListener('click', ()=>{
+      try{ generateScore(); }
+      catch(e){ console.error(e); alert('生成エラー: ' + e.message); }
     });
-  });
 
-  const bassVoice = new VF.Voice({num_beats: bassEntries.length, beat_value:4}).setStrict(false);
-  bassVoice.addTickables(bassNotes);
-  const trebleVoice = new VF.Voice({num_beats: bassEntries.length, beat_value:4}).setStrict(false);
-  trebleVoice.addTickables(trebleNotes);
-
-  const formatter = new VF.Formatter();
-  formatter.joinVoices([trebleVoice]);
-  formatter.joinVoices([bassVoice]);
-  const minJustifyWidth = formatter.preCalculateMinTotalWidth([trebleVoice, bassVoice]);
-  const justifyWidth = minJustifyWidth + bassEntries.length*115 + 40;
-  const staveStartPad = 90; 
-  const staveWidth = justifyWidth + staveStartPad + 30;
-  const width = staveWidth + 40;
-  const height = 360;
-
-  const renderer = new VF.Renderer(holder, VF.Renderer.Backends.SVG);
-  renderer.resize(width, height);
-  const ctx = renderer.getContext();
-  ctx.setFont('Georgia', 10);
-
-  const trebleStave = new VF.Stave(20, 30, staveWidth);
-  const bassStave = new VF.Stave(20, 130, staveWidth);
-
-  const vexSig = keyNameToVexSig(keyName);
-  trebleStave.addClef('treble').addKeySignature(vexSig);
-  bassStave.addClef('bass').addKeySignature(vexSig);
-
-  trebleStave.setContext(ctx).draw();
-  bassStave.setContext(ctx).draw();
-
-  const brace = new VF.StaveConnector(trebleStave, bassStave).setType(VF.StaveConnector.type.BRACE);
-  brace.setContext(ctx).draw();
-  const lineLeft = new VF.StaveConnector(trebleStave, bassStave).setType(VF.StaveConnector.type.SINGLE_LEFT);
-  lineLeft.setContext(ctx).draw();
-  const lineRight = new VF.StaveConnector(trebleStave, bassStave).setType(VF.StaveConnector.type.SINGLE_RIGHT);
-  lineRight.setContext(ctx).draw();
-
-  formatter.format([trebleVoice, bassVoice], justifyWidth);
-
-  trebleVoice.draw(ctx, trebleStave);
-  bassVoice.draw(ctx, bassStave);
-
-  let maxBottom = bassStave.getYForLine(4);
-  bassNotes.forEach(note=>{
-    const bb = note.getBoundingBox && note.getBoundingBox();
-    if(bb) maxBottom = Math.max(maxBottom, bb.y + bb.h);
-  });
-  const figureStartY = maxBottom + 16;
-  const lineHeight = 15;
-
-  bassNotes.forEach((note, i)=>{
-    const lines = figureDisplayLines(bassEntries[i].fig);
-    if(lines.length===0) return;
-    const noteX = note.getAbsoluteX();
-    ctx.save();
-    ctx.setFont('Georgia', 13, 'bold');
-    ctx.setFillStyle('#7a2e2e');
-    let y = figureStartY;
-    lines.forEach(line=>{
-      const textWidth = (ctx.measureText ? ctx.measureText(line).width : line.length*7);
-      ctx.fillText(line, noteX - textWidth/2 + 4, y);
-      y += lineHeight;
+    window.addEventListener('load', ()=>{
+      try{ generateScore(); } catch(e){ console.error(e); }
     });
-    ctx.restore();
-  });
-
-  summary.forEach(s=>{
-    const div = document.createElement('div');
-    div.className = 'row';
-    const spellStr = s.spellings.map(sp => getGermanNoteName(sp.letter, sp.acc)).join(' , ');
-    div.innerHTML = `<span class="idx">${s.idx}</span><span class="fig">${s.bass} [${s.fig}]</span><span class="tones">→ ${spellStr}</span>`;
-    tonesList.appendChild(div);
-  });
-}
-
-document.getElementById('generateBtn').addEventListener('click', ()=>{
-  try{ generateScore(); }
-  catch(e){ console.error(e); alert('生成エラー: ' + e.message); }
-});
-
-window.addEventListener('load', ()=>{
-  try{ generateScore(); } catch(e){ console.error(e); }
-});
-</script>
-</body>
+    </script>
+  </body>
 </html>

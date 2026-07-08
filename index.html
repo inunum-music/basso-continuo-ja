@@ -1,0 +1,630 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+<meta charset="UTF-8">
+<title>通奏低音レアリゼーション・ヴィジュアライザー</title>
+<script src="https://cdn.jsdelivr.net/npm/vexflow@4.2.2/build/cjs/vexflow.js"></script>
+<style>
+  :root{
+    --paper:#efe8d8;
+    --paper-dark:#e2d8c1;
+    --ink:#2b241c;
+    --ink-soft:#5c5344;
+    --line:#c9bc9c;
+    --accent:#7a2e2e;
+    --accent-soft:#a85c3f;
+    --brass:#8a7539;
+    font-size:16px;
+  }
+  *{box-sizing:border-box;}
+  body{
+    margin:0;
+    background:
+      radial-gradient(ellipse at top left, #f5efe0 0%, transparent 60%),
+      var(--paper);
+    color:var(--ink);
+    font-family:"Iowan Old Style","Palatino Linotype","Hoefler Text",Georgia,serif;
+    padding:2.5rem 1.5rem 4rem;
+  }
+  .wrap{max-width:980px;margin:0 auto;}
+  header{
+    border-bottom:2px solid var(--ink);
+    padding-bottom:1.1rem;
+    margin-bottom:1.8rem;
+    display:flex;
+    justify-content:space-between;
+    align-items:flex-end;
+    flex-wrap:wrap;
+    gap:.5rem;
+  }
+  h1{
+    font-size:1.55rem;
+    font-weight:600;
+    letter-spacing:.02em;
+    margin:0;
+  }
+  h1 small{
+    display:block;
+    font-family:"Helvetica Neue",Arial,sans-serif;
+    font-size:.68rem;
+    letter-spacing:.18em;
+    text-transform:uppercase;
+    color:var(--accent-soft);
+    margin-top:.3rem;
+  }
+  .figbass-mark{
+    font-family:"Helvetica Neue",Arial,sans-serif;
+    font-size:.7rem;
+    letter-spacing:.1em;
+    color:var(--ink-soft);
+    border:1px solid var(--line);
+    padding:.25rem .6rem;
+    border-radius:2px;
+    background:rgba(255,255,255,.35);
+  }
+
+  .panel{
+    background:rgba(255,255,255,.4);
+    border:1px solid var(--line);
+    border-radius:4px;
+    padding:1.2rem 1.3rem;
+    margin-bottom:1.3rem;
+  }
+  .panel-title{
+    font-family:"Helvetica Neue",Arial,sans-serif;
+    font-size:.72rem;
+    letter-spacing:.14em;
+    text-transform:uppercase;
+    color:var(--accent);
+    margin:0 0 .8rem 0;
+    display:flex;
+    align-items:center;
+    gap:.5rem;
+  }
+  .panel-title::after{
+    content:"";
+    flex:1;
+    height:1px;
+    background:var(--line);
+  }
+
+  .key-row{display:flex;align-items:center;gap:.7rem;flex-wrap:wrap;}
+  label{font-size:.82rem;color:var(--ink-soft);}
+  select, input[type=text], input[type=number]{
+    font-family:inherit;
+    font-size:.9rem;
+    background:#fdfbf5;
+    border:1px solid var(--line);
+    border-radius:3px;
+    padding:.35rem .5rem;
+    color:var(--ink);
+  }
+  select:focus, input:focus{outline:2px solid var(--accent-soft); outline-offset:1px;}
+
+  table.rows{width:100%; border-collapse:collapse;}
+  table.rows th{
+    font-family:"Helvetica Neue",Arial,sans-serif;
+    font-size:.66rem;
+    letter-spacing:.08em;
+    text-transform:uppercase;
+    color:var(--ink-soft);
+    text-align:left;
+    padding:.3rem .4rem;
+    border-bottom:1px solid var(--line);
+  }
+  table.rows td{padding:.35rem .4rem; vertical-align:middle;}
+  table.rows tr:not(:last-child) td{border-bottom:1px solid #ddd2b8;}
+  .fig-input{width:9.5rem;}
+  .oct-input{width:3.4rem;}
+  .del-btn{
+    background:none;border:1px solid var(--line);border-radius:3px;
+    color:var(--accent); cursor:pointer; font-size:.9rem; width:1.8rem; height:1.8rem;
+    line-height:1;
+  }
+  .del-btn:hover{background:var(--accent); color:#fff; border-color:var(--accent);}
+
+  .btnbar{display:flex; gap:.6rem; margin-top:1rem; flex-wrap:wrap;}
+  button.primary, button.secondary{
+    font-family:"Helvetica Neue",Arial,sans-serif;
+    font-size:.78rem;
+    letter-spacing:.06em;
+    text-transform:uppercase;
+    padding:.55rem 1.1rem;
+    border-radius:3px;
+    cursor:pointer;
+    border:1px solid var(--ink);
+  }
+  button.primary{background:var(--accent); color:#fdfbf5; border-color:var(--accent);}
+  button.primary:hover{background:#5f2323;}
+  button.secondary{background:transparent; color:var(--ink); }
+  button.secondary:hover{background:rgba(0,0,0,.05);}
+
+  #score-panel{overflow-x:auto; padding-bottom:1.5rem;}
+  #score-holder{min-width:100%; display:inline-block;}
+
+  .legend{
+    display:flex; flex-wrap:wrap; gap:.5rem 1.2rem;
+    font-family:"Helvetica Neue",Arial,sans-serif;
+    font-size:.78rem; color:var(--ink-soft); margin-top:.6rem;
+  }
+  .legend b{color:var(--ink);}
+
+  .tones-list{
+    font-family:"Helvetica Neue",Arial,sans-serif;
+    font-size:.8rem;
+    color:var(--ink-soft);
+    display:flex; flex-direction:column; gap:.35rem; margin-top:.6rem;
+  }
+  .tones-list .row{
+    display:flex; gap:.6rem; align-items:baseline;
+    border-left:2px solid var(--brass); padding-left:.6rem;
+  }
+  .tones-list .idx{color:var(--accent-soft); font-weight:600; width:1.4rem;}
+  .tones-list .fig{color:var(--accent); font-weight:600;}
+  .tones-list .tones{color:var(--ink);}
+
+  .help{
+    font-family:"Helvetica Neue",Arial,sans-serif;
+    font-size:.74rem; line-height:1.6; color:var(--ink-soft);
+  }
+  .help code{
+    background:#fdfbf5; border:1px solid var(--line); padding:.05rem .3rem;
+    border-radius:2px; color:var(--accent);
+  }
+  footer{
+    text-align:center; font-size:.7rem; color:var(--ink-soft);
+    margin-top:2rem; font-family:"Helvetica Neue",Arial,sans-serif;
+    letter-spacing:.05em;
+  }
+</style>
+</head>
+<body>
+<div class="wrap">
+
+  <header>
+    <h1>通奏低音レアリゼーション<br><small>Figured Bass Realization &amp; Harmony Visualizer</small></h1>
+    <span class="figbass-mark">6 / 6-4 / 7 / 6-5 / 4-3 / 9 …</span>
+  </header>
+
+  <div class="panel">
+    <p class="panel-title">調 &nbsp;Key</p>
+    <div class="key-row">
+      <label for="keySelect">調性</label>
+      <select id="keySelect"></select>
+      <span class="help">短調は和声的短音階（導音を自動的に半音上げる）を基準に度数計算します。</span>
+    </div>
+  </div>
+
+  <div class="panel">
+    <p class="panel-title">低音進行の入力 &nbsp;Bass Line Input</p>
+    <table class="rows" id="rowsTable">
+      <thead>
+        <tr>
+          <th>#</th><th>音名</th><th>変化</th><th>Oct</th><th>音価</th><th>数字（figures）</th><th></th>
+        </tr>
+      </thead>
+      <tbody id="rowsBody"></tbody>
+    </table>
+    <div class="btnbar">
+      <button class="secondary" id="addRowBtn" type="button">＋ 行を追加</button>
+      <button class="primary" id="generateBtn" type="button">五線譜を生成 ▸</button>
+    </div>
+    <p class="help" style="margin-top:.9rem;">
+      数字の書式例：無し(5/3の三和音) / <code>6</code> / <code>6/4</code> / <code>7</code> / <code>6/5</code> /
+      <code>4/3</code> / <code>4/2</code>（または<code>2</code>） / <code>9</code> / <code>7/9</code> /
+      <code>4-3</code>（掛留）/ <code>7-6</code> / <code>9-8</code> / 単独の変化記号 <code>#</code> <code>b</code>（第3音の変化）/
+      増六和音 <code>it6</code> <code>fr6</code> <code>ger6</code>。<br>
+      それ以外の任意の組み合わせ（例：<code>#4</code>, <code>b7</code>, <code>2 4 6</code>）も度数として直接解釈されます。
+    </p>
+  </div>
+
+  <div class="panel" id="score-panel">
+    <p class="panel-title">大譜表 &nbsp;Score</p>
+    <div id="score-holder"></div>
+    <div class="legend">
+      <span><b>高音部の点</b>＝その和音構成音に一致する全てのピッチ（オクターブ4〜5の範囲）</span>
+      <span><b>低音部</b>＝入力された低音音符</span>
+    </div>
+  </div>
+
+  <div class="panel">
+    <p class="panel-title">解析結果 &nbsp;Resolved Tones</p>
+    <div class="tones-list" id="tonesList"></div>
+  </div>
+
+  <footer>作成:INUNUM &amp; 佐々木崇紘</footer>
+</div>
+
+<script>
+/* =========================================================
+   1. music theory core
+   ========================================================= */
+const LETTERS = ['C','D','E','F','G','A','B'];
+const NOTE_BASE = {C:0,D:2,E:4,F:5,G:7,A:9,B:11};
+const SHARP_ORDER = ['F','C','G','D','A','E','B'];
+const FLAT_ORDER  = ['B','E','A','D','G','C','F'];
+const ACC_SYMBOL = {'-2':'bb','-1':'b','0':'','1':'#','2':'##'};
+const ACC_VALUE  = {'bb':-2,'b':-1,'':0,'#':1,'##':2};
+
+// key signature table: sharps positive, flats negative
+const KEY_SIGNATURES = {
+  'C_major':0,'G_major':1,'D_major':2,'A_major':3,'E_major':4,'B_major':5,'F#_major':6,'C#_major':7,
+  'F_major':-1,'Bb_major':-2,'Eb_major':-3,'Ab_major':-4,'Db_major':-5,'Gb_major':-6,'Cb_major':-7,
+  'A_minor':0,'E_minor':1,'B_minor':2,'F#_minor':3,'C#_minor':4,'G#_minor':5,'D#_minor':6,
+  'D_minor':-1,'G_minor':-2,'C_minor':-3,'F_minor':-4,'Bb_minor':-5,'Eb_minor':-6
+};
+const KEY_LABELS = {
+  'C_major':'ハ長調 C Major','G_major':'ト長調 G Major','D_major':'ニ長調 D Major','A_major':'イ長調 A Major',
+  'E_major':'ホ長調 E Major','B_major':'ロ長調 B Major','F#_major':'嬰ヘ長調 F# Major','C#_major':'嬰ハ長調 C# Major',
+  'F_major':'ヘ長調 F Major','Bb_major':'変ロ長調 Bb Major','Eb_major':'変ホ長調 Eb Major','Ab_major':'変イ長調 Ab Major',
+  'Db_major':'変ニ長調 Db Major','Gb_major':'変ト長調 Gb Major','Cb_major':'変ハ長調 Cb Major',
+  'A_minor':'イ短調 A Minor','E_minor':'ホ短調 E Minor','B_minor':'ロ短調 B Minor','F#_minor':'嬰ヘ短調 F# Minor',
+  'C#_minor':'嬰ハ短調 C# Minor','G#_minor':'嬰ト短調 G# Minor','D#_minor':'嬰ニ短調 D# Minor',
+  'D_minor':'ニ短調 D Minor','G_minor':'ト短調 G Minor','C_minor':'ハ短調 C Minor','F_minor':'ヘ短調 F Minor',
+  'Bb_minor':'変ロ短調 Bb Minor','Eb_minor':'変ホ短調 Eb Minor'
+};
+
+function buildDiatonicScale(keyName){
+  const [tonicRaw, mode] = keyName.split('_');
+  const tonicLetter = tonicRaw[0];
+  const sig = KEY_SIGNATURES[keyName];
+  const startIdx = LETTERS.indexOf(tonicLetter);
+  const accMap = {}; LETTERS.forEach(l=>accMap[l]=0);
+  if(sig>0){ for(let i=0;i<sig;i++) accMap[SHARP_ORDER[i]] += 1; }
+  if(sig<0){ for(let i=0;i<Math.abs(sig);i++) accMap[FLAT_ORDER[i]] -= 1; }
+  const scale = [];
+  for(let i=0;i<7;i++){
+    const letter = LETTERS[(startIdx+i)%7];
+    scale.push({letter, acc: accMap[letter]});
+  }
+  if(mode==='minor'){
+    scale[6] = {letter:scale[6].letter, acc:scale[6].acc+1}; // harmonic minor: raised 7th
+  }
+  return scale;
+}
+
+function pitchClassOf(letter, acc){
+  return ((NOTE_BASE[letter] + acc) % 12 + 12) % 12;
+}
+
+// degree: 1-based scale-step distance above bass (letter-name counting)
+function degreeToPitch(bassLetter, degree, explicitAcc, scale){
+  const bassIdx = scale.findIndex(s=>s.letter===bassLetter);
+  const idx = ((bassIdx + (degree-1)) % 7 + 7) % 7;
+  const letter = scale[idx].letter;
+  const defaultAcc = scale[idx].acc;
+  const acc = (explicitAcc===null || explicitAcc===undefined) ? defaultAcc : explicitAcc;
+  return {letter, acc, pc: pitchClassOf(letter, acc)};
+}
+
+/* ---- figure string parsing ---- */
+function parseToken(tok){
+  tok = tok.trim();
+  if(!tok) return null;
+  let m = tok.match(/^(bb|##|b|#|n)?(\d+)$/i);
+  if(m){
+    const accStr = m[1] ? m[1].toLowerCase() : '';
+    return {degree: parseInt(m[2],10), acc: m[1] ? ACC_VALUE[accStr] : null};
+  }
+  m = tok.match(/^(bb|##|b|#|n)$/i);
+  if(m){
+    return {degree:3, acc: ACC_VALUE[m[1].toLowerCase()]};
+  }
+  return null;
+}
+
+// combos keyed by sorted comma-joined degree list -> additional degrees to realize (besides bass=1)
+const COMBO_TABLE = {
+  '':[3,5],
+  '6':[3,6],
+  '4,6':[4,6],
+  '7':[3,5,7],
+  '5,6':[3,5,6],       // 6/5
+  '3,4':[3,4,6],       // 4/3 (seventh, 3rd inversion figure) -- see suspension override below
+  '2,4':[2,4,6],       // 4/2
+  '2':[2,4,6],
+  '9':[3,5,7,9],
+  '7,9':[3,5,7,9],
+  '5,9':[3,5,7,9]
+};
+// when the raw string contained a dash ("-"), treat as a suspension figure instead
+const SUSPENSION_TABLE = {
+  '3,4':[3,4,5],   // 4-3
+  '6,7':[3,6,7],   // 7-6
+  '8,9':[3,5,9],   // 9-8
+  '2,3':[2,3,5]    // 3-2 (rare)
+};
+const AUGMENTED_SIXTHS = {
+  'it6':[0,4,10], 'it+6':[0,4,10], 'italian6':[0,4,10],
+  'fr6':[0,4,6,10], 'fr+6':[0,4,6,10], 'french6':[0,4,6,10],
+  'ger6':[0,4,7,10], 'ger+6':[0,4,7,10], 'german6':[0,4,7,10]
+};
+
+function parseFigureString(str){
+  const raw = (str||'').trim();
+  const lowerCompact = raw.toLowerCase().replace(/\s+/g,'');
+  if(AUGMENTED_SIXTHS[lowerCompact]){
+    return {type:'absolute', offsets: AUGMENTED_SIXTHS[lowerCompact]};
+  }
+  const hasDash = raw.indexOf('-') !== -1;
+  const tokens = raw.split(/[\/\-\s,]+/).filter(Boolean).map(parseToken).filter(Boolean);
+
+  if(tokens.length===0){
+    return {type:'degrees', entries:[{degree:1,acc:null}].concat(COMBO_TABLE[''].map(d=>({degree:d,acc:null})))};
+  }
+
+  const sortedKey = [...new Set(tokens.map(t=>t.degree))].sort((a,b)=>a-b).join(',');
+  let extraDegrees;
+  if(hasDash && SUSPENSION_TABLE[sortedKey]){
+    extraDegrees = SUSPENSION_TABLE[sortedKey];
+  } else if(COMBO_TABLE[sortedKey]){
+    extraDegrees = COMBO_TABLE[sortedKey];
+  } else {
+    // fallback: bass + explicit tokens + default 3,5 unless already implied by 4/6 replacements
+    const given = new Set(tokens.map(t=>t.degree));
+    extraDegrees = [...given];
+    if(!given.has(4) && !given.has(6) && !given.has(2) && !given.has(9)){
+      if(!given.has(3)) extraDegrees.push(3);
+      if(!given.has(5)) extraDegrees.push(5);
+    }
+  }
+  // build entries: prefer explicit accidental from tokens when matching degree, else null(=diatonic default)
+  const accByDegree = {};
+  tokens.forEach(t=>{ if(t.acc!==null) accByDegree[t.degree]=t.acc; });
+  const entries = [{degree:1, acc:null}];
+  const seen = new Set([1]);
+  extraDegrees.forEach(d=>{
+    if(seen.has(d)) return;
+    seen.add(d);
+    entries.push({degree:d, acc: (d in accByDegree)? accByDegree[d] : null});
+  });
+  return {type:'degrees', entries};
+}
+
+function resolveChordTones(bassLetter, bassAcc, figureStr, scale){
+  const parsed = parseFigureString(figureStr);
+  const bassPc = pitchClassOf(bassLetter, bassAcc);
+  let tones = []; // {letter, acc, pc}
+  if(parsed.type==='absolute'){
+    tones.push({letter:bassLetter, acc:bassAcc, pc:bassPc});
+    parsed.offsets.slice(1).forEach(off=>{
+      const pc = ((bassPc+off)%12+12)%12;
+      tones.push({letter:null, acc:null, pc});
+    });
+  } else {
+    parsed.entries.forEach(e=>{
+      if(e.degree===1){
+        tones.push({letter:bassLetter, acc: e.acc===null? bassAcc : e.acc, pc: pitchClassOf(bassLetter, e.acc===null?bassAcc:e.acc)});
+      } else {
+        const t = degreeToPitch(bassLetter, e.degree, e.acc, scale);
+        tones.push(t);
+      }
+    });
+  }
+  return tones;
+}
+
+/* =========================================================
+   2. UI state & row management
+   ========================================================= */
+const rowsBody = document.getElementById('rowsBody');
+const keySelect = document.getElementById('keySelect');
+let rowCounter = 0;
+
+Object.keys(KEY_LABELS).forEach(k=>{
+  const opt = document.createElement('option');
+  opt.value = k; opt.textContent = KEY_LABELS[k];
+  if(k==='C_major') opt.selected = true;
+  keySelect.appendChild(opt);
+});
+
+function addRow(preset){
+  preset = preset || {};
+  rowCounter++;
+  const tr = document.createElement('tr');
+  tr.dataset.id = rowCounter;
+  tr.innerHTML = `
+    <td>${rowCounter}</td>
+    <td>
+      <select class="letterSel">
+        ${LETTERS.map(l=>`<option value="${l}" ${preset.letter===l?'selected':''}>${l}</option>`).join('')}
+      </select>
+    </td>
+    <td>
+      <select class="accSel">
+        <option value="-2" ${preset.acc===-2?'selected':''}>♭♭</option>
+        <option value="-1" ${preset.acc===-1?'selected':''}>♭</option>
+        <option value="0" ${(preset.acc===0||preset.acc===undefined)?'selected':''}>―</option>
+        <option value="1" ${preset.acc===1?'selected':''}>♯</option>
+        <option value="2" ${preset.acc===2?'selected':''}>♯♯</option>
+      </select>
+    </td>
+    <td><input type="number" class="oct-input octInput" min="1" max="6" value="${preset.oct||3}"></td>
+    <td>
+      <select class="durSel">
+        <option value="w" ${preset.dur==='w'?'selected':''}>全音符</option>
+        <option value="h" ${preset.dur==='h'?'selected':''}>2分音符</option>
+        <option value="q" ${(preset.dur==='q'||!preset.dur)?'selected':''}>4分音符</option>
+        <option value="8" ${preset.dur==='8'?'selected':''}>8分音符</option>
+      </select>
+    </td>
+    <td><input type="text" class="fig-input figInput" placeholder="例: 6/4" value="${preset.fig||''}"></td>
+    <td><button type="button" class="del-btn" title="削除">×</button></td>
+  `;
+  tr.querySelector('.del-btn').addEventListener('click', ()=>{ tr.remove(); });
+  rowsBody.appendChild(tr);
+}
+
+document.getElementById('addRowBtn').addEventListener('click', ()=>addRow());
+
+// initial demo rows: I-V6-I6-ii6/5-V7-I  (typical cadential progression in C major)
+addRow({letter:'C', acc:0, oct:3, dur:'q', fig:''});
+addRow({letter:'B', acc:0, oct:3, dur:'q', fig:'6'});
+addRow({letter:'E', acc:0, oct:3, dur:'q', fig:'6'});
+addRow({letter:'D', acc:0, oct:3, dur:'q', fig:'6/5'});
+addRow({letter:'G', acc:0, oct:2, dur:'q', fig:'7'});
+addRow({letter:'C', acc:0, oct:3, dur:'q', fig:''});
+
+/* =========================================================
+   3. VexFlow rendering
+   ========================================================= */
+const ACC_TO_VEX = {'-2':'bb','-1':'b','0':null,'1':'#','2':'##'};
+
+function vexKey(letter, acc, octave){
+  const sym = ACC_SYMBOL[String(acc)] || '';
+  return `${letter.toLowerCase()}${sym}/${octave}`;
+}
+
+function keyNameToVexSig(keyName){
+  const [tonicRaw, mode] = keyName.split('_');
+  return mode==='minor' ? tonicRaw+'m' : tonicRaw;
+}
+
+function generateScore(){
+  if(typeof Vex === 'undefined' || !Vex.Flow){
+    throw new Error('VexFlowライブラリの読み込みに失敗しました。ネットワーク接続、または広告ブロッカー/スクリプトブロッカーの設定をご確認ください。');
+  }
+  const holder = document.getElementById('score-holder');
+  holder.innerHTML = '';
+  const tonesList = document.getElementById('tonesList');
+  tonesList.innerHTML = '';
+
+  const rows = Array.from(rowsBody.querySelectorAll('tr'));
+  if(rows.length===0){ return; }
+
+  const keyName = keySelect.value;
+  const scale = buildDiatonicScale(keyName);
+
+  const bassEntries = [];
+  rows.forEach((tr, i)=>{
+    const letter = tr.querySelector('.letterSel').value;
+    const acc = parseInt(tr.querySelector('.accSel').value,10);
+    const oct = parseInt(tr.querySelector('.octInput').value,10) || 3;
+    const dur = tr.querySelector('.durSel').value;
+    const fig = tr.querySelector('.figInput').value;
+    bassEntries.push({letter, acc, oct, dur, fig, idx:i+1});
+  });
+
+  const noteWidth = 95;
+  const width = Math.max(560, bassEntries.length*noteWidth + 180);
+  const height = 300;
+
+  const VF = Vex.Flow;
+  const renderer = new VF.Renderer(holder, VF.Renderer.Backends.SVG);
+  renderer.resize(width, height);
+  const ctx = renderer.getContext();
+  ctx.setFont('Georgia', 10);
+
+  const trebleStave = new VF.Stave(20, 20, width-40);
+  const bassStave = new VF.Stave(20, 150, width-40);
+
+  const vexSig = keyNameToVexSig(keyName);
+  trebleStave.addClef('treble').addKeySignature(vexSig);
+  bassStave.addClef('bass').addKeySignature(vexSig);
+
+  trebleStave.setContext(ctx).draw();
+  bassStave.setContext(ctx).draw();
+
+  const brace = new VF.StaveConnector(trebleStave, bassStave).setType(VF.StaveConnector.type.BRACE);
+  brace.setContext(ctx).draw();
+  const lineLeft = new VF.StaveConnector(trebleStave, bassStave).setType(VF.StaveConnector.type.SINGLE_LEFT);
+  lineLeft.setContext(ctx).draw();
+  const lineRight = new VF.StaveConnector(trebleStave, bassStave).setType(VF.StaveConnector.type.SINGLE_RIGHT);
+  lineRight.setContext(ctx).draw();
+
+  const bassNotes = [];
+  const trebleNotes = [];
+  const summary = [];
+
+  bassEntries.forEach(entry=>{
+    // ---- bass note ----
+    const bKey = vexKey(entry.letter, entry.acc, entry.oct);
+    const bNote = new VF.StaveNote({keys:[bKey], duration:entry.dur, clef:'bass'});
+    const bSym = ACC_TO_VEX[String(entry.acc)];
+    if(bSym) bNote.addModifier(new VF.Accidental(bSym), 0);
+    bassNotes.push(bNote);
+
+    // ---- resolve harmony ----
+    const tones = resolveChordTones(entry.letter, entry.acc, entry.fig, scale);
+    const pcSet = [...new Set(tones.map(t=>t.pc))];
+
+    // find spellings: for tones with known letter/acc use them; for absolute-offset tones (aug6) derive a reasonable spelling
+    const spellings = tones.map(t=>{
+      if(t.letter){ return {letter:t.letter, acc:t.acc, pc:t.pc}; }
+      // derive nearest letter spelling for a raw pitch-class (used only for aug6 chord extra tones)
+      for(const s of scale){
+        if(pitchClassOf(s.letter, s.acc)===t.pc) return {letter:s.letter, acc:s.acc, pc:t.pc};
+      }
+      // fallback: use chromatic letter guess
+      const guessLetters = ['C','C','D','D','E','F','F','G','G','A','A','B'];
+      return {letter:guessLetters[t.pc], acc:0, pc:t.pc};
+    });
+
+    // build all dot keys across octave range 4-5 matching any pc in pcSet
+    const dotKeys = [];
+    [4,5].forEach(oct=>{
+      spellings.forEach(sp=>{
+        const k = vexKey(sp.letter, sp.acc, oct);
+        if(!dotKeys.includes(k)) dotKeys.push(k);
+      });
+    });
+    dotKeys.sort((a,b)=>{
+      const oa = parseInt(a.split('/')[1],10), ob = parseInt(b.split('/')[1],10);
+      if(oa!==ob) return oa-ob;
+      return a.localeCompare(b);
+    });
+
+    const tNote = new VF.StaveNote({keys:dotKeys, duration:entry.dur, clef:'treble', auto_stem:true});
+    dotKeys.forEach((k, i)=>{
+      const letter = k[0].toUpperCase();
+      const accPart = k.slice(1, k.indexOf('/'));
+      const vAcc = accPart==='' ? null : accPart;
+      if(vAcc) tNote.addModifier(new VF.Accidental(vAcc), i);
+      tNote.setKeyStyle(i, {fillStyle: '#7a2e2e', strokeStyle:'#7a2e2e'});
+    });
+    tNote.setStemStyle && tNote.setStemStyle({strokeStyle:'rgba(0,0,0,0)'});
+    // hide stems for a pure "dot" look
+    tNote.render_options.stroke_style = 'rgba(0,0,0,0)';
+    trebleNotes.push(tNote);
+
+    summary.push({idx:entry.idx, bass:`${entry.letter}${ACC_SYMBOL[String(entry.acc)]||''}${entry.oct}`, fig: entry.fig||'(5/3)', spellings, pcSet});
+  });
+
+  const bassVoice = new VF.Voice({num_beats: bassEntries.length, beat_value:4}).setStrict(false);
+  bassVoice.addTickables(bassNotes);
+  const trebleVoice = new VF.Voice({num_beats: bassEntries.length, beat_value:4}).setStrict(false);
+  trebleVoice.addTickables(trebleNotes);
+
+  const formatter = new VF.Formatter();
+  formatter.joinVoices([trebleVoice]);
+  formatter.joinVoices([bassVoice]);
+  formatter.format([trebleVoice, bassVoice], width-140);
+
+  trebleVoice.draw(ctx, trebleStave);
+  bassVoice.draw(ctx, bassStave);
+
+  // manually suppress stem rendering by covering with paper-color rectangles is unreliable;
+  // instead we already set stroke to transparent above via render_options / note style.
+
+  // ---- textual resolution list ----
+  summary.forEach(s=>{
+    const div = document.createElement('div');
+    div.className = 'row';
+    const spellStr = s.spellings.map(sp=>`${sp.letter}${ACC_SYMBOL[String(sp.acc)]||''}`).join(' , ');
+    div.innerHTML = `<span class="idx">${s.idx}</span><span class="fig">${s.bass} [${s.fig}]</span><span class="tones">→ ${spellStr}</span>`;
+    tonesList.appendChild(div);
+  });
+}
+
+document.getElementById('generateBtn').addEventListener('click', ()=>{
+  try{ generateScore(); }
+  catch(e){ console.error(e); alert('生成エラー: ' + e.message); }
+});
+
+// initial render
+window.addEventListener('load', ()=>{
+  try{ generateScore(); } catch(e){ console.error(e); }
+});
+</script>
+</body>
+</html>
